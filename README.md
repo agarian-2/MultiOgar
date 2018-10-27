@@ -22,6 +22,8 @@ Original MultiOgar code is based on the private server implementation [Ogar](htt
 
 MultiOgar-Edited code however, is based on MultiOgar code that has been heavily modified and improved by many collaborators. The overall goal of this fork is to make physics as vanilla as possible, cleanup most of the code, and add lots of new features while maintaining better performance than the original MultiOgar.
 
+While I have no specific client this server is bound to, I highly suggest using my client. It is hosted at https://agarian-2.github.io/ and its Github repository is here: https://github.com/agarian-2/agarian-2.github.io. To connect to a custom server, press CTRL+SHIFT+J and type in the following: `setServer("serverip:serverport")`. The client uses `wss://` be default because of the github.io link. If your server does not support `wss://`, you will need to download the client and go into `main_out.js` to change it to `ws://`.
+
 >---
 
 # Installation
