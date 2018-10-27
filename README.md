@@ -1,8 +1,7 @@
 # MultiOgar-Edited
 
 [![Discord](https://discordapp.com/api/guilds/407210435721560065/embed.png?style=banner2)](https://discord.gg/27v68Sb)
-[![Discord](https://discordapp.com/api/guilds/407210435721560065/embed.png?style=banner2)](https://discord.gg/JrwVT3F)
-
+An invite to my Discord server (IDK how to add the fancy embed lol): https://discord.gg/JrwVT3F
 *Please note that my Discord invite doesn't lead to an agar.io-related server, it's just my Discord server.*
 
 A fast, open source [Agar.io](http://agar.io/) server that supports multiple protocol versions and smooth vanilla physics.
