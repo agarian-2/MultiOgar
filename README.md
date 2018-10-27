@@ -1,15 +1,18 @@
 # MultiOgar-Edited
 
 [![Discord](https://discordapp.com/api/guilds/407210435721560065/embed.png?style=banner2)](https://discord.gg/27v68Sb)
+[![Discord](https://discordapp.com/api/guilds/407210435721560065/embed.png?style=banner2)](https://discord.gg/JrwVT3F)
+
+*Please note that my Discord invite doesn't lead to an agar.io-related server, it's just my Discord server.*
 
 A fast, open source [Agar.io](http://agar.io/) server that supports multiple protocol versions and smooth vanilla physics.
 
-Since August of 2016, [Barbosik](https://github.com/Barbosik) has stopped working on this project. So I forked the code and remade it into MultiOgar-Edited, an updated version of the previous MultiOgar.
+Since August of 2016, [Barbosik](https://github.com/Barbosik) has stopped working on this project. So Megabyte918 forked the code and remade it into MultiOgar-Edited, an updated version of the previous MultiOgar. Then it got sort-of abandoned, so I decided to upload my heavily modified MultiOgar-Edited server.
 
 >---
 
 # Information
-Current version : **1.6.1**
+Current version : **?.?.?**
 
 ![Language](https://img.shields.io/badge/language-node.js-yellow.svg)
 [![License](https://img.shields.io/badge/license-APACHE2-blue.svg)](https://github.com/Barbosik/OgarMulti/blob/master/LICENSE.md)
