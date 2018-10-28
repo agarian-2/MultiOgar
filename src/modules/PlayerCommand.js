@@ -84,27 +84,9 @@ PlayerCommand.list = {
             this.writeLine("/status: Shows the server's current status.");
             this.writeLine("/teleport: Teleport to a specified location");
             this.writeLine("/virus: Spawns a virus under you.");
-            //this.writeLine("/rp: Shortcut for replace.");
-            //this.writeLine("/help 4: Shows page 4 of commands.");
             this.writeLine("This is the last page of commands.");
             this.writeLine("~~~~~~~~~~~~~~~~~~~PAGE 3~~~~~~~~~~~~~~~~~~~");
         }
-        /*if (page == 4) {
-            this.writeLine("~~~~~~~~~~~~~~~~~~COMMANDS~~~~~~~~~~~~~~~~~~");
-            this.writeLine("/m: Shortcut for mass.");
-            this.writeLine("/sm: Shortcut for spawnmass.");
-            this.writeLine("/e: Shortcut for explode.");
-            this.writeLine("/k: Shortcut for kill.");
-            this.writeLine("/ka: Shortcut for killall.");
-            this.writeLine("/s: Shortcut for speed.");
-            this.writeLine("/f: Shortcut for freeze.");
-            this.writeLine("/c: Shortcut for change.");
-            this.writeLine("/rp: Shortcut for replace.");
-            this.writeLine("/ab: Shortcut for addbot.");
-            this.writeLine("/kb: Shortcut for kickbots.");
-            this.writeLine("This is the last page of commands.");
-            this.writeLine("~~~~~~~~~~~~~~~~~~~PAGE 4~~~~~~~~~~~~~~~~~~~");
-        }*/
     },
     ophelp: function(args) {
         var page = parseInt(args[1]);
