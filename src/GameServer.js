@@ -156,8 +156,7 @@ function GameServer() {
         botStartSize: 31.623,
         freeRoamSpeed: 25,
         mobilePhysics: 0,
-        gravitationalPushsplits: 0,
-        serverMonotoneType: "gray",
+        gravitationalPushsplits: 0
     };
     this.ipBanList = [];
     this.minionTest = [];
@@ -453,19 +452,6 @@ GameServer.prototype.randomColor = function() {
                 };
             }
     }
-};
-
-GameServer.prototype.monotoneColors = function() {
-    let color = Math.floor(255 * Math.random()) + 0;
-    let config = this.config;
-    return config.serverMonotoneType == "gray" ? {r: color, g: color, b: color} :
-        config.serverMonotoneType == "red" ? {r: color, g: 0, b: 0} :
-        config.serverMonotoneType == "yellow" ? {r: color, g: color, b: 0} :
-        config.serverMonotoneType == "green" ? { r: 0, g: color, b: 0} :
-        config.serverMonotoneType == "blue" ? {r: 0, g: 0, b: color} :
-        config.serverMonotoneType == "cyan" ? {r: 0, g: color, b: color} :
-        config.serverMonotoneType == "pink" ? {r: color, g: 0, b: color} :
-        void 0;
 };
 
 GameServer.prototype.removeNode = function(node) {
