@@ -372,64 +372,87 @@ GameServer.prototype.setBorder = function(width, height) {
 };
 
 GameServer.prototype.randomColor = function() {
-    let config = this.config;
-    if (config.serverColorType == 0) { // MultiOgar's original random color system
-        let h = 360 * Math.random();
-        let s = 248/255;
-        //let v = 1;
-        let RGB = {r: 1, g: 1, b: 1};
-        if (s > 0) {
-            h /= 60;
-            let i = ~~(h) >> 0;
-            let f = h - i;
-            let p = 1 * (1 - s);
-            let q = 1 * (1 - s * f);
-            let t = 1 * (1 - s * (1 - f));
-            switch (i) {
-                case 0: RGB = {r: 1, g: t, b: p}; break;
-                case 1: RGB = {r: q, g: 1, b: p}; break;
-                case 2: RGB = {r: p, g: 1, b: t}; break;
-                case 3: RGB = {r: p, g: q, b: 1}; break;
-                case 4: RGB = {r: t, g: p, b: 1}; break;
-                default: RGB = {r: 1, g: p, b: q}; break;
+    switch (this.config.serverColorType) {
+        default:
+        case 0: // MultiOgar's original random color system
+            {
+                var h = 360 * Math.random();
+                var s = 248 / 255;
+                let RGB = {
+                    r: 1,
+                    g: 1,
+                    b: 1
+                };
+                if (s > 0) {
+                    h /= 60;
+                    var i = ~~(h) >> 0;
+                    var f = h - i;
+                    var p = 1 * (1 - s);
+                    var q = 1 * (1 - s * f);
+                    var t = 1 * (1 - s * (1 - f));
+                    switch (i) {
+                        case 0:
+                            RGB = {r: 1, g: t, b: p};
+                            break;
+                        case 1:
+                            RGB = {r: q, g: 1, b: p};
+                            break;
+                        case 2:
+                            RGB = {r: p, g: 1, b: t};
+                            break;
+                        case 3:
+                            RGB = {r: p, g: q, b: 1};
+                            break;
+                        case 4:
+                            RGB = {r: t, g: p, b: 1};
+                            break;
+                        default:
+                            RGB = {r: 1, g: p, b: q};
+                    }
+                }
+                RGB.r = Math.max(RGB.r, 0);
+                RGB.g = Math.max(RGB.g, 0);
+                RGB.b = Math.max(RGB.b, 0);
+                RGB.r = Math.min(RGB.r, 1);
+                RGB.g = Math.min(RGB.g, 1);
+                RGB.b = Math.min(RGB.b, 1);
+                return {
+                    r: (RGB.r * 255) >> 0,
+                    g: (RGB.g * 255) >> 0,
+                    b: (RGB.b * 255) >> 0
+                };
             }
-        }
-        RGB.r = Math.max(RGB.r, 0);
-        RGB.g = Math.max(RGB.g, 0);
-        RGB.b = Math.max(RGB.b, 0);
-        RGB.r = Math.min(RGB.r, 1);
-        RGB.g = Math.min(RGB.g, 1);
-        RGB.b = Math.min(RGB.b, 1);
-        return {
-            r: (RGB.r * 255) >> 0,
-            g: (RGB.g * 255) >> 0,
-            b: (RGB.b * 255) >> 0
-        };
+        case 1: // Ogar-Unlimited's random color system
+            {
+                let RGB = [0xFF, 0x07, (Math.random() * 255) >> 0];
+                RGB.sort(function () {
+                    return .5 - Math.random();
+                });
+                return {
+                    r: RGB[0],
+                    b: RGB[1],
+                    g: RGB[2]
+                };
+            }
+        case 2: // Old Ogar's random color system
+            {
+                var index = Math.floor(Math.random() * this.oldColors.length);
+                let RGB = this.oldColors[index];
+                return {
+                    r: RGB.r,
+                    g: RGB.g,
+                    b: RGB.b
+                };
+            }
+        case 3: // Truely randomized color system
+            {
+                return {
+                    r: Math.floor(255 * Math.random()) + 0,
+                    g: Math.floor(255 * Math.random()) + 0,
+                    b: Math.floor(255 * Math.random()) + 0
+                };
+            }
     }
-    if (config.serverColorType == 1) { // Ogar-Unlimited's random color system
-        let RGB = [0xFF, 0x07, (Math.random() * 255) >> 0];
-        RGB.sort(function () {return .5 - Math.random()});
-        return {
-            r: RGB[0],
-            b: RGB[1],
-            g: RGB[2]
-        };
-    }
-    if (config.serverColorType == 2) { // Old Ogar's random color system
-        let index = Math.floor(Math.random() * this.oldColors.length);
-        let RGB = this.oldColors[index];
-        return {
-            r: RGB.r,
-            g: RGB.g,
-            b: RGB.b
-        };
-    }
-    if (config.serverColorType == 3) return { // Truely randomized color system
-        r: Math.floor(255 * Math.random()) + 0,
-        g: Math.floor(255 * Math.random()) + 0,
-        b: Math.floor(255 * Math.random()) + 0
-    };
-    if (config.serverColorType == 4) return this.monotoneColors(); // Monotone colors
 };
 
 GameServer.prototype.monotoneColors = function() {
