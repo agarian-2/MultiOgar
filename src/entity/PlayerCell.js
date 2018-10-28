@@ -23,15 +23,15 @@ PlayerCell.prototype.getSpeed = function(dist) {
 };
 
 PlayerCell.prototype.onAdd = function(gameServer) {
-    if (gameServer.config.unshift) gameServer.nodes.player.unshift(this);
-    else gameServer.nodes.player.push(this);
+    if (this.gameServer.config.unshift) this.gameServer.nodes.player.unshift(this);
+    else this.gameServer.nodes.player.push(this);
     gameServer.gameMode.onCellAdd(this);
 };
 
 PlayerCell.prototype.onRemove = function(gameServer) {
     var index = this.owner.cells.indexOf(this);
-    index != -1 && this.owner.cells.splice(index, 1);
+    if (index != -1) this.owner.cells.splice(index, 1);
     index = gameServer.nodes.player.indexOf(this);
-    index != -1 && gameServer.nodes.player.splice(index, 1);
+    if (index != -1) gameServer.nodes.player.splice(index, 1);
     gameServer.gameMode.onCellRemove(this);
 };
