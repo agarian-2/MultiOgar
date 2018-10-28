@@ -36,10 +36,14 @@ PlayerCommand.prototype.userLogin = function(ip, password) {
     return null;
 };
 
+PlayerCommand.prototype.getName = function() {
+    return (!this.playerTracker.cells.length ? "A dead cell" : !this.playerTracker._name.length ? "An unnamed cell" : this.playerTracker._name).trim();
+};
+
 PlayerCommand.list = {
     help: function(args) {
         var page = parseInt(args[1]);
-        if (isNaN(page) || (page != 1 && page != 2 && page != 3/* && page != 4*/)) return this.writeLine("INFO: Type /help 1 to display the first page of commands (there are 3 total).");
+        if (isNaN(page) || page < 1 || page > 3) return this.writeLine("INFO: Type /help 1 to display the first page of commands (there are 3 total).");
         if (page == 1) {
             this.writeLine("~~~~~~~~~~~~~~~~~~COMMANDS~~~~~~~~~~~~~~~~~");
             this.writeLine("/addbot: Adds bots to the server.");
@@ -84,13 +88,14 @@ PlayerCommand.list = {
             this.writeLine("/status: Shows the server's current status.");
             this.writeLine("/teleport: Teleport to a specified location");
             this.writeLine("/virus: Spawns a virus under you.");
+            this.writeLine("/foodcolor: Sets the color of food spawned by the F key.");
             this.writeLine("This is the last page of commands.");
             this.writeLine("~~~~~~~~~~~~~~~~~~~PAGE 3~~~~~~~~~~~~~~~~~~~");
         }
     },
     ophelp: function(args) {
         var page = parseInt(args[1]);
-        if (isNaN(page) || (page != 1 && page != 2)) return this.writeLine("INFO: Type /ophelp 1 to display the first page of OP keys (there are 2 total).");
+        if (isNaN(page) || page < 1 || page > 2) return this.writeLine("INFO: Type /ophelp 1 to display the first page of OP keys (there are 2 total).");
         if (page == 1) {
             this.writeLine("~~~~~~~~~~OP MODE KEYS~~~~~~~~~~");
             this.writeLine(" E : Minions split.");
@@ -177,8 +182,7 @@ PlayerCommand.list = {
         this.gameServer.config[key] = value;
         this.gameServer.config.playerMinSize = Math.max(32, this.gameServer.config.playerMinSize);
         this.writeLine("Set '" + key + "' to " + this.gameServer.config[key] + ".");
-        var name = !this.playerTracker._name.length ? "An unnamed cell" : this.playerTracker._name;
-        Log.info(name + " changed the config value '" + key + "' to " + this.gameServer.config[key] + ".");
+        Log.info(this.getName() + " changed the config value '" + key + "' to " + this.gameServer.config[key] + ".");
     },
     chat: function (args) {
         if (!this.playerTracker.OP.enabled) return this.writeLine("WARN: You must have OP mode to use this command!");
@@ -247,7 +251,6 @@ PlayerCommand.list = {
         this.writeLine("You are " + (this.playerTracker.frozen ? "now" : "no longer") + " frozen.");
     },
     getcolor: function() {
-        if (!this.playerTracker.OP.enabled) return this.writeLine("WARN: You must have OP mode to use this command!");
         var client = this.playerTracker;
         if (!client.cells.length) return this.writeLine("ERROR: You are either dead or not playing!");
         this.writeLine("Your RGB color is (" + client.color.r + ", " + client.color.g + ", " + client.color.b + ").");
@@ -460,7 +463,7 @@ PlayerCommand.list = {
         }
         if ("mothercell" == ent) {
             if (gameServer.gameMode.ID != 2) return this.writeLine("ERROR: Mothercells can only be cleared in experimental mode!");
-            for (;gameServer.nodes.virus.length;) gameServer.removeNode(gameServer.nodes.virus[0]);
+            for (;gameServer.gameMode.mothercells.length;) gameServer.removeNode(gameServer.gameMode.mothercells[0]);
             this.writeLine("Removed all mothercell nodes.");
         }
     },
@@ -549,11 +552,12 @@ PlayerCommand.list = {
     op: function(args) {
         var password = parseInt(args[1]);
         if (password != "12345") {
-            Log.warn(this.playerTracker.name + " tried to use OP mode, but typed the incorrect password!");
+            Log.warn(this.getName() + " tried to use OP mode, but typed the incorrect password!");
             return this.writeLine("That password is incorrect!");
         }
         this.playerTracker.OP.enabled = !this.playerTracker.OP.enabled;
         this.writeLine("You " + (this.playerTracker.OP.enabled ? "now" : "no longer") + " have OP mode.");
+        this.playerTracker.OP.enabled ? Log.info(this.getName() + " gave themself OP mode.") : Log.info(this.getName() + " removed OP mode from themself.");
     },
     gamemode: function(args) {
         if (!this.playerTracker.OP.enabled) return this.writeLine("WARN: You must have OP mode to use this command!");
@@ -572,8 +576,18 @@ PlayerCommand.list = {
     shutdown: function(args) {
         if (!this.playerTracker.OP.enabled) return this.writeLine("WARN: You must have OP mode to use this command!");
         this.writeLine("Shutdown request has been sent.");
-        var name = !this.playerTracker._name.length ? "An unnamed cell" : this.playerTracker._name;
-        Log.warn("Shutdown request has been sent by " + name + "!");
+        Log.warn("Shutdown request has been sent by " + this.getName() + "!");
         process.exit(0);
+    },
+    foodcolor: function(args) {
+        if (!this.playerTracker.OP.enabled) return this.writeLine("WARN: You must have OP mode to use this command!");
+        var r = parseInt(args[1]);
+        var g = parseInt(args[2]);
+        var b = parseInt(args[3]);
+        if (isNaN(r) || isNaN(g) || isNaN(b)) return this.writeLine("ERROR: Please specify a valid RGB color!");
+        this.playerTracker.OP.foodColor.r = r;
+        this.playerTracker.OP.foodColor.g = g;
+        this.playerTracker.OP.foodColor.b = b;
+        this.writeLine("Food spawned by the F key will now have a color of (" + r + ", " + g + ", " + b + ").");
     }
 };
