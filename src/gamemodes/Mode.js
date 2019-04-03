@@ -1,17 +1,18 @@
 'use strict';
+
 function Mode() {
     this.ID = -1;
     this.name = "Null";
     this.decayMod = 1;
     this.packetLB = 49;
-    this.isTeams = 0;
-    this.isTournament = 0;
+    this.isTeams = false;
+    this.isTournament = false;
 }
 
 module.exports = Mode;
 
 Mode.prototype.onServerInit = function(gameServer) {
-    gameServer.running = 1;
+    gameServer.running = true;
 };
 
 Mode.prototype.onTick = function(gameServer) {};
@@ -34,8 +35,8 @@ Mode.prototype.updateLB = function(gameServer) {
 };
 
 Mode.prototype.onChange = function(gameServer) {
-    for (;gameServer.nodes.all.length;) gameServer.removeNode(gameServer.nodes.all[0]);
-    for (;gameServer.nodes.eject.length;) gameServer.removeNode(gameServer.nodes.eject[0]);
-    for (;gameServer.nodes.food.length;) gameServer.removeNode(gameServer.nodes.food[0]);
-    for (;gameServer.nodes.virus.length;) gameServer.removeNode(gameServer.nodes.virus[0]);
+    for (;gameServer.nodesAll.length;) gameServer.removeNode(gameServer.nodesAll[0]);
+    for (;gameServer.nodesEject.length;) gameServer.removeNode(gameServer.nodesEject[0]);
+    for (;gameServer.nodesFood.length;) gameServer.removeNode(gameServer.nodesFood[0]);
+    for (;gameServer.nodesVirus.length;) gameServer.removeNode(gameServer.nodesVirus[0]);
 };
