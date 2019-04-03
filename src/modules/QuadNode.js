@@ -1,9 +1,10 @@
 'use strict';
+
 function QuadNode(bound, maxChild, maxLevel, level, parent) {
     if (!level) level = 0;
     if (!parent) parent = null;
-    var width = (bound.maxX - bound.minX) / 2;
-    var height = (bound.maxY - bound.minY) / 2;
+    var width = (bound.maxX - bound.minX) / 2,
+        height = (bound.maxY - bound.minY) / 2;
     this.level = level;
     this.parent = parent;
     this.bound = {
@@ -15,7 +16,7 @@ function QuadNode(bound, maxChild, maxLevel, level, parent) {
         halfHeight: height,
         cx: bound.minX + width,
         cy: bound.minY + height
-    },
+    };
     this.maxChildren = maxChild;
     this.maxLevel = maxLevel;
     this.childNodes = [];
@@ -24,29 +25,51 @@ function QuadNode(bound, maxChild, maxLevel, level, parent) {
 module.exports = QuadNode;
 
 QuadNode.prototype.insert = function(item) {
-    if (item._quadNode != null) throw new TypeError(
-        "QuadNode.insert: Cannot insert item which already belongs to another QuadNode!"
-    );
-    if (this.childNodes.length != 0) {
+    if (item._quadNode != null) throw new TypeError("QuadNode.insert: Cannot insert item which already belongs to another QuadNode!");
+    if (this.childNodes.length !== 0) {
         var quad = this.getQuad(item.bound);
         if (quad !== -1) return this.childNodes[quad].insert(item);
     }
     this.items.push(item);
     item._quadNode = this;
-    if (this.childNodes.length != 0 || this.level >= this.maxLevel || this.items.length < this.maxChildren) return;
-    if (this.childNodes.length == 0) {
-        var width = this.bound.halfWidth, height = this.bound.halfHeight;
-        var x0 = this.bound.minX + width, y0 = this.bound.minY;
-        var x1 = this.bound.minX, y1 = this.bound.minY;
-        var x2 = this.bound.minX, y2 = this.bound.minY + height;
-        var x3 = this.bound.minX + width, y3 = this.bound.minY + height;
-        var b0 = {minX: x0, minY: y0, maxX: x0 + width, maxY: y0 + height};
-        var b1 = {minX: x1, minY: y1, maxX: x1 + width, maxY: y1 + height};
-        var b2 = {minX: x2, minY: y2, maxX: x2 + width, maxY: y2 + height};
-        var b3 = {minX: x3, minY: y3, maxX: x3 + width, maxY: y3 + height};
-        this.childNodes.push(new QuadNode(b0, this.maxChildren, this.maxLevel, this.level + 1, this)),
-        this.childNodes.push(new QuadNode(b1, this.maxChildren, this.maxLevel, this.level + 1, this)),
-        this.childNodes.push(new QuadNode(b2, this.maxChildren, this.maxLevel, this.level + 1, this)),
+    if (this.childNodes.length !== 0 || this.level >= this.maxLevel || this.items.length < this.maxChildren) return;
+    if (this.childNodes.length === 0) {
+        var width = this.bound.halfWidth, height = this.bound.halfHeight,
+            x0 = this.bound.minX + width,
+            y0 = this.bound.minY,
+            x1 = this.bound.minX,
+            y1 = this.bound.minY,
+            x2 = this.bound.minX,
+            y2 = this.bound.minY + height,
+            x3 = this.bound.minX + width,
+            y3 = this.bound.minY + height,
+            b0 = {
+                minX: x0,
+                minY: y0,
+                maxX: x0 + width,
+                maxY: y0 + height
+            },
+            b1 = {
+                minX: x1,
+                minY: y1,
+                maxX: x1 + width,
+                maxY: y1 + height
+            },
+            b2 = {
+                minX: x2,
+                minY: y2,
+                maxX: x2 + width,
+                maxY: y2 + height
+            },
+            b3 = {
+                minX: x3,
+                minY: y3,
+                maxX: x3 + width,
+                maxY: y3 + height
+            };
+        this.childNodes.push(new QuadNode(b0, this.maxChildren, this.maxLevel, this.level + 1, this));
+        this.childNodes.push(new QuadNode(b1, this.maxChildren, this.maxLevel, this.level + 1, this));
+        this.childNodes.push(new QuadNode(b2, this.maxChildren, this.maxLevel, this.level + 1, this));
         this.childNodes.push(new QuadNode(b3, this.maxChildren, this.maxLevel, this.level + 1, this));
     }
     for (var i = 0; i < this.items.length;) {
@@ -91,11 +114,9 @@ QuadNode.prototype.find = function(bound, call) {
     if (0 != this.childNodes.length) {
         var quad = this.getQuad(bound);
         if (quad != -1) this.childNodes[quad].find(bound, call);
-        else {
-            for (var i = 0; i < this.childNodes.length; i++) {
-                var node = this.childNodes[i];
-                intersects(node.bound, bound) && node.find(bound, call);
-            }
+        else for (var i = 0; i < this.childNodes.length; i++) {
+            var node = this.childNodes[i];
+            intersects(node.bound, bound) && node.find(bound, call);
         }
     }
     for (var i = 0; i < this.items.length; i++) {
@@ -105,15 +126,12 @@ QuadNode.prototype.find = function(bound, call) {
 };
 
 QuadNode.prototype.any = function(bound, predicate) {
-    if (this.childNodes.length != 0) {
+    if (this.childNodes.length !== 0) {
         var quad = this.getQuad(bound);
         if (quad != -1) if (this.childNodes[quad].any(bound, predicate)) return 1;
-        else {
-            for (var i = 0; i < this.childNodes.length; i++) {
-                var node = this.childNodes[i];
-                if (intersects(node.bound, bound) &&
-                node.any(bound, predicate)) return 1;
-            }
+        else for (var i = 0; i < this.childNodes.length; i++) {
+            var node = this.childNodes[i];
+            if (intersects(node.bound, bound) && node.any(bound, predicate)) return 1;
         }
     }
     for (var i = 0; i < this.items.length; i++) {
@@ -123,23 +141,21 @@ QuadNode.prototype.any = function(bound, predicate) {
     return 0;
 };
 
-QuadNode.prototype.nodeCount = function () {
+QuadNode.prototype.nodeCount = function() {
     var count = 0;
-    for (var i = 0; i < this.childNodes.length; i++)
-        count += this.childNodes[i].nodeCount();
+    for (var i = 0; i < this.childNodes.length; i++) count += this.childNodes[i].nodeCount();
     return 1 + count;
 };
 
-QuadNode.prototype.itemCount = function () {
+QuadNode.prototype.itemCount = function() {
     var count = 0;
-    for (var i = 0; i < this.childNodes.length; i++)
-        count += this.childNodes[i].itemCount();
+    for (var i = 0; i < this.childNodes.length; i++) count += this.childNodes[i].itemCount();
     return this.items.length + count;
 };
 
 QuadNode.prototype.getQuad = function(bound) {
-    var top = bound.minY < this.bound.cy && bound.maxY < this.bound.cy;
-    var left = bound.minX < this.bound.cx && bound.maxX < this.bound.cx;
+    var top = bound.minY < this.bound.cy && bound.maxY < this.bound.cy,
+        left = bound.minX < this.bound.cx && bound.maxX < this.bound.cx;
     if (left) {
         if (top) return 1;
         if (bound.minY > this.bound.cy) return 2;
@@ -161,8 +177,5 @@ function cleanup(node) {
 }
 
 function intersects(b1, b2) {
-    var intersecting =
-        b2.minX >= b1.maxX || b2.maxX <= b1.minX ||
-        b2.minY >= b1.maxY || b2.maxY <= b1.minY;
-    return !intersecting;
+    return !(b2.minX >= b1.maxX || b2.maxX <= b1.minX || b2.minY >= b1.maxY || b2.maxY <= b1.minY);
 }
