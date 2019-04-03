@@ -58,7 +58,7 @@ Teams.prototype.onPlayerInit = function(player) {
 };
 
 Teams.prototype.onCellAdd = function(cell) {
-    cell.cellType === 0 && this.nodes[cell.owner.team].push(cell);
+    if (cell.cellType === 0) this.nodes[cell.owner.team].push(cell);
 };
 
 Teams.prototype.onCellRemove = function(cell) {
