@@ -563,7 +563,7 @@ PlayerCommand.list = {
     op: function(args) {
         var password = parseInt(args[1]);
         if (isNaN(password)) password = args[1];
-        if (password !== "your_password_here") {
+        if (password !== this.gameServer.config.serverChatPassword) {
             Log.warn(this.getName() + " tried to use OP mode, but typed the incorrect password!");
             return this.writeLine("That password is incorrect!");
         }
