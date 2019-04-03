@@ -43,7 +43,7 @@ UpdateLeaderboard.prototype.userText = function(protocol) {
     return writer.toBuffer();
 };
 
-UpdateLeaderboard.prototype.userText14 = function () {
+UpdateLeaderboard.prototype.userText14 = function() {
     var writer = new BinaryWriter();
     writer.writeUInt8(0x35);
     for (var i = 0; i < this.leaderboard.length; i++) {
@@ -60,9 +60,9 @@ UpdateLeaderboard.prototype.FFA5 = function() {
     for (var i = 0; i < this.leaderboardCount; i++) {
         var item = this.leaderboard[i];
         if (item == null) return null;
-        var name = item._nameUnicode;
-        var id = 0;
-        if (item == this.playerTracker && item.cells.length) id = item.cells[0].nodeID ^ this.playerTracker.scramble.ID;
+        var name = item._nameUnicode,
+            id = 0;
+        if (item == this.playerTracker && item.cells.length) id = item.cells[0].nodeID ^ this.playerTracker.scrambleID;
         writer.writeUInt32(id >>> 0);
         if (name) writer.writeBytes(name);
         else writer.writeUInt16(0);
@@ -76,8 +76,8 @@ UpdateLeaderboard.prototype.FFA6 = function() {
     for (var i = 0; i < this.leaderboardCount; i++) {
         var item = this.leaderboard[i];
         if (item == null) return null;
-        var name = item._nameUtf8;
-        var id = item == this.playerTracker ? 1 : 0;
+        var name = item._nameUtf8,
+            id = item == this.playerTracker ? 1 : 0;
         writer.writeUInt32(id >>> 0);
         if (name) writer.writeBytes(name);
         else writer.writeUInt8(0);
@@ -86,8 +86,8 @@ UpdateLeaderboard.prototype.FFA6 = function() {
 };
 
 UpdateLeaderboard.prototype.FFA = function(protocol) {
-    var lbCount = Math.min(this.leaderboard.length, this.playerTracker.gameServer.clients.length);
-    var LeaderboardPosition = require('./LeaderboardPosition');
+    var lbCount = Math.min(this.leaderboard.length, this.playerTracker.gameServer.clients.length),
+        LeaderboardPosition = require('./LeaderboardPosition');
     this.playerTracker.socket.sendPacket(new LeaderboardPosition(this.leaderboard.indexOf(this.playerTracker) + 1));
     var writer = new BinaryWriter();
     writer.writeUInt8(0x35);
