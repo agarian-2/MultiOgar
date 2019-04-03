@@ -1,28 +1,27 @@
 // Needs further reworking...
 'use strict';
-const Tournament = require('./Tournament');
-const Entity = require('../entity');
-const Log = require('../modules/Logger');
+const Tournament = require('./Tournament'),
+    Entity = require('../entity'),
+    Log = require('../modules/Logger');
 
 function Hide(gameServer) {
     Tournament.apply(this, Array.prototype.slice.call(arguments));
     this.ID = 6;
     this.name = "Hide and Seek";
     this.maxContenders = 12;
-    this.isTournament = 1;
+    this.isTournament = true;
     this.packetLB = 48;
-    this.virusRandomSize = 1;
+    //this.virusRandomSize = true;
 }
 
 module.exports = Hide;
 Hide.prototype = new Tournament();
 
-Hide.prototype.onServerInit = function (gameServer) {
+Hide.prototype.onServerInit = function(gameServer) {
     Log.warn("Since the gamemode is Hide and Seek, it is highly recommended that you don't use the reload command.");
     Log.warn("This is because configs set by the gamemode will be reset to the config.ini values.");
     this.prepare(gameServer);
-    if (gameServer.config.serverBots > this.maxContenders)
-        gameServer.config.serverBots = this.maxContenders;
+    if (gameServer.config.serverBots > this.maxContenders) gameServer.config.serverBots = this.maxContenders;
     gameServer.config.spawnInterval = 1;
     gameServer.config.foodSpawnAmount = 10;
     gameServer.config.foodMinAmount = 1200;
@@ -48,7 +47,7 @@ Hide.prototype.onServerInit = function (gameServer) {
     this.spawnCell(gameServer, Math.random() * (141.2 - 100) + 100);*/
 };
 
-Hide.prototype.onPlayerSpawn = function (gameServer, player) {
+Hide.prototype.onPlayerSpawn = function(gameServer, player) {
     if ((this.gamePhase == 0) && (this.contenders.length < this.maxContenders)) {
         player.color = gameServer.randomColor();
         this.contenders.push(player);
