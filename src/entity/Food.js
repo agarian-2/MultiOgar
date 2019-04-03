@@ -5,10 +5,6 @@ function Food() {
     Cell.apply(this, Array.prototype.slice.call(arguments));
     this.cellType = 1;
     this.tickOfBirth = 0;
-    /*if (this.getAge() >= 200) this.setSize(14.14);
-    if (this.getAge() >= 400) this.setSize(17.32);
-    if (this.getAge() >= 600) this.setSize(20);
-    console.log(this.getAge());*/
 }
 
 module.exports = Food;
@@ -20,10 +16,10 @@ Food.prototype.getAge = function() {
 };
 
 Food.prototype.onAdd = function(gameServer) {
-    gameServer.nodes.food.push(this);
+    gameServer.nodesFood.push(this);
 };
 
 Food.prototype.onRemove = function(gameServer) {
-    var index = gameServer.nodes.food.indexOf(this);
-    index != -1 && gameServer.nodes.food.splice(index, 1);
+    var index = gameServer.nodesFood.indexOf(this);
+    if (index !== -1) gameServer.nodesFood.splice(index, 1);
 };
