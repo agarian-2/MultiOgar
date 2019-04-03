@@ -70,6 +70,7 @@ function GameServer() {
         serverWelcome2: "",
         clientBind: "",
         filterBadWords: 1,
+        serverChatPassword: "12345",
         // Server Minion Configs
         minionDefaultName: "Minion",
         minionSameColor: 0,
