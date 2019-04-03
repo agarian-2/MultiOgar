@@ -6,24 +6,31 @@ function ChatMessage(sender, message) {
 
 module.exports = ChatMessage;
 
-ChatMessage.prototype.build = function (protocol) {
+ChatMessage.prototype.build = function(protocol) {
     var text = this.message;
     if (text == null) text = "";
-    var name = "SERVER";
-    var color = {r: 255, g: 0, b: 0};
+    var name = "SERVER",
+        color = {
+            r: 255,
+            g: 0,
+            b: 0
+        };
     if (this.sender != null) {
         name = this.sender._name;
-        if (name != "SERVER") color = {r: 155, g: 155, b: 155};
-        if (name == null || name.length == 0) {
-            if (this.sender.cells.length > 0) name = "An unnamed cell";
+        if (name !== "SERVER") color = {
+            r: 155,
+            g: 155,
+            b: 155
+        };
+        if (name == null || !name.length) {
+            if (this.sender.cells.length) name = "An unnamed cell";
             else name = "Spectator";
         }
-        if (this.sender.cells.length > 0)
-            color = this.sender.cells[0].color;
+        if (this.sender.cells.length) color = this.sender.cells[0].color;
     }
-    var UserRoleEnum = require("../enum/UserRoleEnum");
-    var BinaryWriter = require("./BinaryWriter");
-    var writer = new BinaryWriter();
+    var UserRoleEnum = require("../enum/UserRoleEnum"),
+        BinaryWriter = require("./BinaryWriter"),
+        writer = new BinaryWriter();
     writer.writeUInt8(0x63);
     var flags = 0;
     if (this.sender == null) flags = 0x80;
