@@ -430,7 +430,7 @@ GameServer.prototype.randomColor = function() {
             }
         case 1: // Ogar-Unlimited's random color system
             {
-                RGB = [255, 7, (Math.random() * 255) >> 0];/*0xFF, 0x07*/
+                RGB = [255, 7, (Math.random() * 255) >> 0];
                 RGB.sort(function() {
                     return .5 - Math.random();
                 });
@@ -443,21 +443,20 @@ GameServer.prototype.randomColor = function() {
         case 2: // Old Ogar's random color system
             {
                 var oldColors = [
-                        {r: 235, g:  75, b:   0},
-                        {r: 225, g: 125, b: 255},
-                        {r: 180, g:   7, b:  20},
-                        {r:  80, g: 170, b: 240},
-                        {r: 180, g:  90, b: 135},
-                        {r: 195, g: 240, b:   0},
-                        {r: 150, g:  18, b: 255},
-                        {r:  80, g: 245, b:   0},
-                        {r: 165, g:  25, b:   0},
-                        {r:  80, g: 145, b:   0},
-                        {r:  80, g: 170, b: 240},
-                        {r:  55, g:  92, b: 255},
-                    ],
-                    index = ~~(Math.random() * oldColors.length);
-                RGB = oldColors[index];
+                    {r: 235, g:  75, b:   0},
+                    {r: 225, g: 125, b: 255},
+                    {r: 180, g:   7, b:  20},
+                    {r:  80, g: 170, b: 240},
+                    {r: 180, g:  90, b: 135},
+                    {r: 195, g: 240, b:   0},
+                    {r: 150, g:  18, b: 255},
+                    {r:  80, g: 245, b:   0},
+                    {r: 165, g:  25, b:   0},
+                    {r:  80, g: 145, b:   0},
+                    {r:  80, g: 170, b: 240},
+                    {r:  55, g:  92, b: 255},
+                ];
+                RGB = oldColors[Math.floor(Math.random() * oldColors.length)];
                 return {
                     r: RGB.r,
                     g: RGB.g,
@@ -467,9 +466,9 @@ GameServer.prototype.randomColor = function() {
         case 3: // Truely randomized color system
             {
                 return {
-                    r: ~~(255 * Math.random()) + 0,
-                    g: ~~(255 * Math.random()) + 0,
-                    b: ~~(255 * Math.random()) + 0
+                    r: Math.floor(255 * Math.random()),
+                    g: Math.floor(255 * Math.random()),
+                    b: Math.floor(255 * Math.random())
                 };
             }
     }
@@ -830,7 +829,7 @@ GameServer.prototype.spawnCells = function(player) {
 GameServer.prototype.spawnPlayer = function(client, pos) {
     if (this.disableSpawn) return;
     var startSize = client.spawnMass || (client.isMi ? this.config.minionStartSize : client.isBot ? this.config.botStartSize : this.config.playerStartSize),
-        eject = this.nodesEject[~~(this.nodesEject.length * Math.random())];
+        eject = this.nodesEject[Math.floor(this.nodesEject.length * Math.random())];
     if (eject && eject.boostDistance < 1 && 100 * Math.random() <= this.config.ejectSpawnChance) {
         client.color = eject.color;
         pos = {
