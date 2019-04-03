@@ -1,10 +1,10 @@
 'use strict';
-const oldNode = parseInt(process.version[1]) < 6;
-const allocMax = 524288;
+const oldNode = parseInt(process.version[1]) < 6,
+    allocMax = 524288;
 
 function BinaryWriter() {
     this.sharedBuffer = oldNode ? new Buffer(allocMax) : Buffer.allocUnsafe(allocMax);
-    this.allocLength  = 0;
+    this.allocLength = 0;
 }
 
 module.exports = BinaryWriter;
