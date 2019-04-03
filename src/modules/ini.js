@@ -5,12 +5,12 @@ exports.safe = safe;
 exports.unsafe = unsafe;
 exports.getLagMessage = getLagMessage;
 
-var eol = process.platform === "win32" ? "\r\n" : "\n";
-const Log = require('./Logger');
+const eol = process.platform === "win32" ? "\r\n" : "\n",
+    Log = require('./Logger');
 
 function encode(obj, opt) {
-    var children = [];
-    var out = "";
+    var children = [],
+        out = "";
     if (typeof opt === "string") {
         opt = {
             section: opt,
@@ -21,23 +21,22 @@ function encode(obj, opt) {
         opt.whitespace = opt.whitespace === 1;
     }
     var separator = " = ";
-    Object.keys(obj).forEach(function (k, _, __) {
+    Object.keys(obj).forEach(function(k, _, __) {
         var val = obj[k];
-        if (val && Array.isArray(val)) {
-            val.forEach(function (item) {
-                out += safe(k + "[]") + separator + safe(item) + "\n";
-            });
-        } else if (val && typeof val === "object") children.push(k);
+        if (val && Array.isArray(val)) val.forEach(function(item) {
+            out += safe(k + "[]") + separator + safe(item) + "\n";
+        });
+        else if (val && typeof val === "object") children.push(k);
         else out += safe(k) + separator + safe(val) + eol;
     });
     if (opt.section && out.length) out = "[" + safe(opt.section) + "]" + eol + out;
-    children.forEach(function (k, _, __) {
-        var nk = dotSplit(k).join('\\.');
-        var section = (opt.section ? opt.section + "." : "") + nk;
-        var child = encode(obj[k], {
-            section: section,
-            whitespace: opt.whitespace
-        });
+    children.forEach(function(k, _, __) {
+        var nk = dotSplit(k).join('\\.'),
+            section = (opt.section ? opt.section + "." : "") + nk,
+            child = encode(obj[k], {
+                section: section,
+                whitespace: opt.whitespace
+            });
         if (out.length && child.length) out += eol;
         out += child;
     });
@@ -45,20 +44,18 @@ function encode(obj, opt) {
 }
 
 function dotSplit(str) {
-    return str.replace(/\1/g, '\u0002LITERAL\\1LITERAL\u0002')
-        .replace(/\\\./g, '\u0001')
-        .split(/\./).map(function (part) {
-    return part.replace(/\1/g, '\\.').replace(/\2LITERAL\\1LITERAL\2/g, '\u0001');
+    return str.replace(/\1/g, '\u0002LITERAL\\1LITERAL\u0002').replace(/\\\./g, '\u0001').split(/\./).map(function(part) {
+        return part.replace(/\1/g, '\\.').replace(/\2LITERAL\\1LITERAL\2/g, '\u0001');
     });
 }
 
 function decode(str) {
-    var out = {};
-    var p = out;
-    var re = /^\[([^\]]*)\]$|^([^=]+)(=(.*))?$/i;
-    var lines = str.split(/[\r\n]+/g);
-    var section = null;
-    lines.forEach(function (line, _, __) {
+    var out = {},
+        p = out,
+        re = /^\[([^\]]*)\]$|^([^=]+)(=(.*))?$/i,
+        lines = str.split(/[\r\n]+/g),
+        section = null;
+    lines.forEach(function(line, _, __) {
         if (!line || line.match(/^\s*[;#]/)) return;
         var match = line.match(re);
         if (!match) return;
@@ -67,8 +64,8 @@ function decode(str) {
             p = out[section] = out[section] || {};
             return;
         }
-        var key = unsafe(match[2]);
-        var value = match[3] ? unsafe((match[4] || "")) : 1;
+        var key = unsafe(match[2]),
+            value = match[3] ? unsafe((match[4] || "")) : 1;
         if (key.length > 2 && key.slice(-2) === "[]") {
             key = key.substring(0, key.length - 2);
             if (!p[key])  p[key] = [];
@@ -85,23 +82,23 @@ function decode(str) {
             return value.length >= pattern.length && value.lastIndexOf(pattern) === value.length - pattern.length;
         }
         if (isNaN(value)) p[key] = value;
-        else if (isInt(value)) p[key] = parseInt(value);
+        else if (parseInt(value) == value) p[key] = parseInt(value);
         else p[key] = parseFloat(value);
     });
-    Object.keys(out).filter(function (k, _, __) {
+    Object.keys(out).filter(function(k, _, __) {
         if (!out[k] || typeof out[k] !== "object" || Array.isArray(out[k])) return 0;
-        var parts = dotSplit(k);
-        var p = out;
-        var l = parts.pop();
-        var nl = l.replace(/\\\./g, '.');
-        parts.forEach(function (part, _, __) {
+        var parts = dotSplit(k),
+            p = out,
+            l = parts.pop(),
+            nl = l.replace(/\\\./g, '.');
+        parts.forEach(function(part, _, __) {
             if (!p[part] || typeof p[part] !== "object") p[part] = {};
             p = p[part];
         });
         if (p === out && nl === l) return 0;
         p[nl] = out[k];
         return 1;
-    }).forEach(function (del, _, __) {
+    }).forEach(function(del, _, __) {
         delete out[del];
     });
     return out;
@@ -126,8 +123,8 @@ function unsafe(val, doUnesc) {
             Log.error(err.stack);
         }
     } else {
-        var esc = 0;
-        var unesc = "";
+        var esc = 0,
+            unesc = "";
         for (var i = 0, l = val.length; i < l; i++) {
             var c = val.charAt(i);
             if (esc) {
@@ -144,14 +141,6 @@ function unsafe(val, doUnesc) {
     return val;
 }
 
-var isInt = function (n) {
-    return parseInt(n) == n;
-};
-
 function getLagMessage(updateTimeAvg) {
-    if (updateTimeAvg < 20) return "smooth";
-    if (updateTimeAvg < 35) return "decent";
-    if (updateTimeAvg < 40) return "minor lag";
-    if (updateTimeAvg < 50) return "moderate lag";
-    if (updateTimeAvg >= 50) return "major lag";
+    return updateTimeAvg < 20 ? "smooth" : updateTimeAvg < 35 ? "decent" : updateTimeAvg < 40 ? "minor lag" : updateTimeAvg < 50 ? "moderate lag" : updateTimeAvg >= 50 ? "major lag" : "unknown";
 }
