@@ -81,8 +81,8 @@ BinaryReader.prototype.readStringUnicode = function(len) {
 };
 
 BinaryReader.prototype.readStringZeroUtf8 = function() {
-    var len = 0;
-    var termLen = 0;
+    var len = 0,
+        termLen = 0;
     for (var i = this._offset; i < this._buffer.length; i++) {
         if (this._buffer.readUInt8(i) == 0) {termLen = 1; break;}
         len++;
@@ -93,8 +93,8 @@ BinaryReader.prototype.readStringZeroUtf8 = function() {
 };
 
 BinaryReader.prototype.readStringZeroUnicode = function() {
-    var len = 0;
-    var termLen = ((this._buffer.length - this._offset) & 1) != 0 ? 1 : 0;
+    var len = 0,
+        termLen = ((this._buffer.length - this._offset) & 1) != 0 ? 1 : 0;
     for (var i = this._offset; i + 1 < this._buffer.length; i += 2) {
         if (this._buffer.readUInt16LE(i) == 0) {termLen = 2; break;}
         len += 2;
