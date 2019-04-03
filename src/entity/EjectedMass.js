@@ -10,10 +10,10 @@ module.exports = EjectedMass;
 EjectedMass.prototype = new Cell;
 
 EjectedMass.prototype.onAdd = function(gameServer) {
-    gameServer.nodes.eject.push(this);
+    gameServer.nodesEject.push(this);
 };
 
 EjectedMass.prototype.onRemove = function(gameServer) {
-    var index = gameServer.nodes.eject.indexOf(this);
-    index != -1 && gameServer.nodes.eject.splice(index, 1);
+    var index = gameServer.nodesEject.indexOf(this);
+    if (index !== -1) gameServer.nodesEject.splice(index, 1);
 };
