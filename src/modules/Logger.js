@@ -1,8 +1,8 @@
 'use strict';
-const fs = require("fs");
-const util = require("util");
-const EOL = require("os").EOL;
-const LogLevelEnum = require("../enum/LogLevelEnum");
+const fs = require("fs"),
+    util = require("util"),
+    EOL = require("os").EOL,
+    LogLevelEnum = require("../enum/LogLevelEnum");
 
 function debug(message) {
     writeCon(colorWhite, LogLevelEnum.DEBUG, message);
@@ -47,14 +47,14 @@ function writeError(message) {
 }
 
 function getDateString() {
-    var date = new Date();
-    var dy = date.getFullYear();
-    var dm = date.getMonth() + 1;
-    var dd = date.getDate();
-    var th = date.getHours();
-    var tm = date.getMinutes();
-    var ts = date.getSeconds();
-    var tz = date.getMilliseconds();
+    var date = new Date(),
+        dy = date.getFullYear(),
+        dm = date.getMonth() + 1,
+        dd = date.getDate(),
+        th = date.getHours(),
+        tm = date.getMinutes(),
+        ts = date.getSeconds(),
+        tz = date.getMilliseconds();
     dy = ("0000" + dy).slice(-4);
     dm = ("00" + dm).slice(-2);
     dd = ("00" + dd).slice(-2);
@@ -66,10 +66,10 @@ function getDateString() {
 }
 
 function getTimeString() {
-    var date = new Date();
-    var th = date.getHours();
-    var tm = date.getMinutes();
-    var ts = date.getSeconds();
+    var date = new Date(),
+        th = date.getHours(),
+        tm = date.getMinutes(),
+        ts = date.getSeconds();
     th = ("00" + th).slice(-2);
     tm = ("00" + tm).slice(-2);
     ts = ("00" + ts).slice(-2);
@@ -92,12 +92,12 @@ function writeLog(level, message) {
     if (level > logFileVerbosity || writeError) return;
     message = util.format(message);
     var prefix = "";
-    if (level == LogLevelEnum.DEBUG) prefix = "[DEBUG]";
-    else if (level == LogLevelEnum.INFO) prefix = "[INFO]";
-    else if (level == LogLevelEnum.WARN) prefix = "[WARN]";
-    else if (level == LogLevelEnum.ERROR) prefix = "[ERROR]";
-    else if (level == LogLevelEnum.FATAL) prefix = "[FATAL]";
-    else if (level == LogLevelEnum.NONE) prefix = "[NONE]";
+    if (level === LogLevelEnum.DEBUG) prefix = "[DEBUG]";
+    else if (level === LogLevelEnum.INFO) prefix = "[INFO]";
+    else if (level === LogLevelEnum.WARN) prefix = "[WARN]";
+    else if (level === LogLevelEnum.ERROR) prefix = "[ERROR]";
+    else if (level === LogLevelEnum.FATAL) prefix = "[FATAL]";
+    else if (level === LogLevelEnum.NONE) prefix = "[NONE]";
     prefix += "[" + getTimeString() + "] ";
     writeQueue.push(prefix + message + EOL);
     if (writeShutdown) flushSync();
@@ -107,7 +107,7 @@ function writeLog(level, message) {
 function flushAsync() {
     if (writeShutdown || consoleLog == null || writeQueue.length == 0) return;
     writeCounter++;
-    consoleLog.write(writeQueue.shift(), function () {writeCounter--; flushAsync()});
+    consoleLog.write(writeQueue.shift(), function() {writeCounter--; flushAsync()});
 }
 
 function flushSync() {
@@ -127,10 +127,12 @@ function start() {
     if (writeStarted) return;
     writeStarted = 1;
     try {
-        console.log = function (message) {print(message)};
-        var timeString = getDateString();
-        var fileName = logFolder + "/" + logFileName + ".log";
-        var fileName2 = logBackupFolder + "/" + logFileName + "-" + timeString + ".log";
+        console.log = function(message) {
+            print(message);
+        };
+        var timeString = getDateString(),
+            fileName = logFolder + "/" + logFileName + ".log",
+            fileName2 = logBackupFolder + "/" + logFileName + "-" + timeString + ".log";
         if (!fs.existsSync(logFolder)) fs.mkdirSync(logFolder);
         else if (fs.existsSync(fileName)) {
             if (!fs.existsSync(logBackupFolder)) {
@@ -140,12 +142,12 @@ function start() {
         }
         fs.writeFileSync(fileName, "=== Started " + timeString + " ===" + EOL);
         var file = fs.createWriteStream(fileName, {flags: 'a'});
-        file.on('open', function () {
+        file.on('open', function() {
             if (writeShutdown) return file.close();
             consoleLog = file;
             flushAsync();
         });
-        file.on('error', function (err) {
+        file.on('error', function(err) {
             writeError = 1;
             consoleLog = null;
             writeCon(colorRed + colorBright, LogLevelEnum.ERROR, err.message);
@@ -194,23 +196,23 @@ module.exports.getFileVerbosity = function() {
     return logFileVerbosity;
 };
 
-var logVerbosity = LogLevelEnum.DEBUG;
-var logFileVerbosity = LogLevelEnum.DEBUG;
-var writeError = 0;
-var writeCounter = 0;
-var writeShutdown = 0;
-var writeStarted = 0;
-var writeQueue = [];
-var logFolder = "./logs";
-var logBackupFolder = "./logs/LogBackup";
-var logFileName = "ServerLog";
-var consoleLog = null;
-var colorBlack = "[30m";
-var colorRed = "[31m";
-var colorGreen = "[32m";
-var colorYellow = "[33m";
-var colorBlue = "[34m";
-var colorMagenta = "[35m";
-var colorCyan = "[36m";
-var colorWhite = "[37m";
-var colorBright = "[1m";
+var logVerbosity = LogLevelEnum.DEBUG,
+    logFileVerbosity = LogLevelEnum.DEBUG,
+    writeError = 0,
+    writeCounter = 0,
+    writeShutdown = 0,
+    writeStarted = 0,
+    writeQueue = [],
+    logFolder = "./logs",
+    logBackupFolder = "./logs/LogBackup",
+    logFileName = "ServerLog",
+    consoleLog = null,
+    colorBlack = "[30m",
+    colorRed = "[31m",
+    colorGreen = "[32m",
+    colorYellow = "[33m",
+    colorBlue = "[34m",
+    colorMagenta = "[35m",
+    colorCyan = "[36m",
+    colorWhite = "[37m",
+    colorBright = "[1m";
