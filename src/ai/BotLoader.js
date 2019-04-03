@@ -1,6 +1,6 @@
 'use strict';
-const FakeSocket = require("./FakeSocket");
-const PacketHandler = require("../PacketHandler");
+const FakeSocket = require("./FakeSocket"),
+    PacketHandler = require("../PacketHandler");
 
 function BotLoader(gameServer) {
     this.gameServer = gameServer;
@@ -22,7 +22,7 @@ BotLoader.prototype.loadNames = function() {
     this.randomNames = [];
     var fs = require("fs");
     if (fs.existsSync("../src/ai/BotNames.txt")) {
-        this.randomNames = fs.readFileSync("../src/ai/BotNames.txt", "utf8").split(/[\r\n]+/).filter(function (x) {
+        this.randomNames = fs.readFileSync("../src/ai/BotNames.txt", "utf8").split(/[\r\n]+/).filter(function(x) {
             return x != '';
         });
     }
@@ -30,8 +30,8 @@ BotLoader.prototype.loadNames = function() {
 };
 
 BotLoader.prototype.addBot = function() {
-    var BotPlayer = require('./BotPlayer');
-    var socket = new FakeSocket(this.gameServer);
+    var BotPlayer = require('./BotPlayer'),
+        socket = new FakeSocket(this.gameServer);
     socket.playerTracker = new BotPlayer(this.gameServer, socket);
     socket.packetHandler = new PacketHandler(this.gameServer, socket);
     this.gameServer.clients.push(socket);
@@ -39,8 +39,8 @@ BotLoader.prototype.addBot = function() {
 };
 
 BotLoader.prototype.addMinion = function(owner, name) {
-    var MinionPlayer = require('./MinionPlayer');
-    var socket = new FakeSocket(this.gameServer);
+    var MinionPlayer = require('./MinionPlayer'),
+        socket = new FakeSocket(this.gameServer);
     socket.playerTracker = new MinionPlayer(this.gameServer, socket, owner);
     socket.packetHandler = new PacketHandler(this.gameServer, socket);
     socket.playerTracker.owner = owner;
