@@ -7,17 +7,13 @@ function Teams() {
     this.name = "Teams";
     this.decayMod = 1;
     this.packetLB = 50;
-    this.isTeams = 1;
+    this.isTeams = true;
     this.colorFuzziness = 32;
     this.teamCount = 3;
     this.colors = [
         {r: 255, g: 0, b: 0},
         {r: 0, g: 255, b: 0},
-        {r: 0, g: 0, b: 255},
-        //{r: 46, g: 32, b: 0},
-        //{r: 65, g: 100, b: 32},
-        //{r: 117, g: 110, b: 110},
-        //{r: 97, g: 109, b: 101},
+        {r: 0, g: 0, b: 255}
     ];
     this.nodes = [];
 }
@@ -27,7 +23,7 @@ Teams.prototype = new Mode();
 
 Teams.prototype.fuzzColor = function(component) {
     component += Math.random() * this.colorFuzziness >> 0;
-    return range(component, 0, 255);
+    return Math.max(Math.min(component, 255), 0);
 };
 
 Teams.prototype.teamColor = function(team) {
@@ -38,10 +34,6 @@ Teams.prototype.teamColor = function(team) {
         b: this.fuzzColor(color.b)
     };
 };
-
-function range(a, min, max) {
-    return Math.max(Math.min(a, max), min);
-}
 
 Teams.prototype.onPlayerSpawn = function(gameServer, player) {
     player.color = this.teamColor(player.team);
@@ -65,21 +57,21 @@ Teams.prototype.onPlayerInit = function(player) {
     player.team = Math.floor(Math.random() * this.teamCount);
 };
 
-Teams.prototype.onCellAdd = function(cell) { // ONLY players get assigned teams.
-    cell.cellType == 0 && this.nodes[cell.owner.team].push(cell);
+Teams.prototype.onCellAdd = function(cell) {
+    cell.cellType === 0 && this.nodes[cell.owner.team].push(cell);
 };
 
 Teams.prototype.onCellRemove = function(cell) {
     var index = this.nodes[cell.owner.team].indexOf(cell);
-    index != -1 && this.nodes[cell.owner.team].splice(index, 1);
+    if (index !== -1) this.nodes[cell.owner.team].splice(index, 1);
 };
 
 Teams.prototype.onCellMove = function(cell, gameServer) {
     for (var i = 0; i < cell.owner.visibleNodes.length; i++) {
         var check = cell.owner.visibleNodes[i];
-        if (check.cellType != 0 || cell.owner == check.owner) continue;
+        if (check.cellType !== 0 || cell.owner == check.owner) continue;
         var team = cell.owner.team;
-        if (/*(!this.config.minionTeamCollision && !check.owner.isMi) && */check.owner.team == team) {
+        if (check.owner.team === team) {
             var m = cell.checkCellCollision(gameServer, check);
             if (m != null) !m.check.canEat(m.cell);
         }
@@ -99,9 +91,12 @@ Teams.prototype.updateLB = function(gameServer, lb) {
     }
     if (total <= 0) for (var i = 0; i < this.teamCount; i++) gameServer.leaderboard[i] = 0;
     else for (var i = 0; i < this.teamCount; i++) gameServer.leaderboard[i] = teamMass[i] / total;
-    var clients = gameServer.clients.valueOf();
-    clients.sort(function (a, b) {
+    var clients = gameServer.clients.filter(function(player) {
+        var client = player.playerTracker;
+        return !client.isRemoved && client.cells.length && client.socket.isConnected !== false;
+    });
+    clients.sort(function(a, b) {
         return b.playerTracker._score - a.playerTracker._score;
     });
-    if (clients[0] && clients[0] != null && clients[0].playerTracker.isConnected != 0 && clients[0].playerTracker.isRemoved == 0) this.rankOne = clients[0].playerTracker;
+    if (clients[0]) this.rankOne = clients[0].playerTracker;
 };
