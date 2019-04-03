@@ -1,6 +1,6 @@
 'use strict';
-const FFA = require('./FFA');
-const Entity = require('../entity');
+const FFA = require('./FFA'),
+    Entity = require('../entity');
 
 function Experimental() {
     FFA.apply(this, Array.prototype.slice.call(arguments));
@@ -24,37 +24,35 @@ Experimental.prototype.spawnMotherCell = function(gameServer) {
 };
 
 Experimental.prototype.onServerInit = function(gameServer) {
-    gameServer.running = 1;
+    gameServer.running = true;
     var self = this;
-    if (gameServer.config.virusPush != 0) {
-        Entity.Virus.prototype.onEat = function(cell) {
-            var boost = Math.atan2(cell.boostDirection.x, cell.boostDirection.y);
-            this.setBoost(gameServer.config.virusEjectSpeed - 460, boost);
-        };
-    }
+    if (gameServer.config.virusPush != 0) Entity.Virus.prototype.onEat = function(cell) {
+        var boost = Math.atan2(cell.boostDirection.x, cell.boostDirection.y);
+        this.setBoost(gameServer.config.virusEjectSpeed - 460, boost);
+    };
     Entity.MotherCell.prototype.onAdd = function() {
         self.mothercells.push(this);
     };
     Entity.MotherCell.prototype.onRemove = function() {
         var index = self.mothercells.indexOf(this); 
-        index != -1 && self.mothercells.splice(index, 1);
+        if (index !== -1) self.mothercells.splice(index, 1);
     };
 };
 
 Experimental.prototype.onTick = function(gameServer) {
     if ((gameServer.tickCount % this.motherSpawnInterval) === 0) this.spawnMotherCell(gameServer);
     for (var i = 0; i < this.mothercells.length; ++i) {
-        if (this.mothercells[i]._size > this.mothercells[i].minSize) var updateInt = 2;
-        else updateInt = Math.random() * (50 - 25) + 25;
+        var updateInt = Math.random() * (50 - 25) + 25;
+        if (this.mothercells[i]._size > this.mothercells[i].minSize) updateInt = 2;
         if ((gameServer.tickCount % ~~updateInt) === 0) this.mothercells[i].onUpdate();
     }
 };
 
 Experimental.prototype.onChange = function(gameServer) {
     for (var i in this.mothercells) gameServer.removeNode(this.mothercells[i]);
-    for (;gameServer.nodes.all.length;) gameServer.removeNode(gameServer.nodes.all[0]);
-    for (;gameServer.nodes.eject.length;) gameServer.removeNode(gameServer.nodes.eject[0]);
-    for (;gameServer.nodes.food.length;) gameServer.removeNode(gameServer.nodes.food[0]);
-    for (;gameServer.nodes.virus.length;) gameServer.removeNode(gameServer.nodes.virus[0]);
+    for (;gameServer.nodesAll.length;) gameServer.removeNode(gameServer.nodesAll[0]);
+    for (;gameServer.nodesEject.length;) gameServer.removeNode(gameServer.nodesEject[0]);
+    for (;gameServer.nodesFood.length;) gameServer.removeNode(gameServer.nodesFood[0]);
+    for (;gameServer.nodesVirus.length;) gameServer.removeNode(gameServer.nodesVirus[0]);
     Entity.Virus.prototype.feed = require('../entity/Virus').prototype.feed;
 };
