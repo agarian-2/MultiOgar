@@ -6,10 +6,10 @@ function SetBorder(playerTracker, border, gameType, serverName) {
     this.serverName = serverName;
 }
 
-SetBorder.prototype.build = function (protocol) {
-    var scrambleX = this.playerTracker.scramble.X;
-    var scrambleY = this.playerTracker.scramble.Y;
-    var b = this.border;
+SetBorder.prototype.build = function(protocol) {
+    var scrambleX = this.playerTracker.scrambleX,
+        scrambleY = this.playerTracker.scrambleY,
+        b = this.border;
     if (this.gameType == null) {
         var buffer = new Buffer(33);
         buffer.writeUInt8(0x40, 0, 1);
@@ -19,8 +19,8 @@ SetBorder.prototype.build = function (protocol) {
         buffer.writeDoubleLE(b.maxY + scrambleY, 25, 1);
         return buffer;
     }
-    var BinaryWriter = require("./BinaryWriter");
-    var writer = new BinaryWriter();
+    var BinaryWriter = require("./BinaryWriter"),
+        writer = new BinaryWriter();
     writer.writeUInt8(0x40);
     writer.writeDouble(b.minX + scrambleX);
     writer.writeDouble(b.minY + scrambleY);
