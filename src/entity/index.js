@@ -4,5 +4,5 @@ module.exports = {
     Food: require('./Food'),
     Virus: require('./Virus'),
     MotherCell: require('./MotherCell'),
-    EjectedMass: require('./EjectedMass'),
+    EjectedMass: require('./EjectedMass')
 };
