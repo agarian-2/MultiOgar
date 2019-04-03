@@ -166,7 +166,7 @@ PlayerCommand.list = {
             gameServer.leaderboard = newLB;
             gameServer.leaderboardType = 48;
         };
-        if (input != "reset") {
+        if (input !== "reset") {
             this.writeLine("Successfully changed leaderboard values.");
             this.writeLine("Enter 'board reset' to reset leaderboard.");
         } else {
@@ -189,12 +189,12 @@ PlayerCommand.list = {
         this.gameServer.quadTree = new QuadNode(this.gameServer.border, 64, 32);
         this.writeLine("The map size is now (" + width + ", " + height + ").");
     },
-    c/*hange*/: function(args) {
+    change/*c*/: function(args) {
         if (!this.playerTracker.OP.enabled) return this.writeLine("[WARN] You must have OP mode to use this command!");
         if (args.length < 3) return this.writeLine("[ERROR] Please specify a valid value for this config!");
         var key = args[1],
             value = args[2];
-        if (value.indexOf('.') != -1) value = parseFloat(value);
+        if (value.indexOf('.') !== -1) value = parseFloat(value);
         else value = parseInt(value);
         if (value == null || isNaN(value)) return this.writeLine("[ERROR] Invalid value: " + value + "!");
         if (!this.gameServer.config.hasOwnProperty(key)) return this.writeLine("[ERROR] Unknown config value: " + key + "!");
@@ -234,7 +234,7 @@ PlayerCommand.list = {
         this.writeLine("Virus nodes: " + gameServer.nodesVirus.length),
         this.writeLine("Ejected nodes: " + gameServer.nodesEject.length),
         this.writeLine("Food nodes: " + gameServer.nodesFood.length);
-        if (gameServer.gameMode.ID != 2) this.writeLine("MotherCell nodes: 0");
+        if (gameServer.gameMode.ID !== 2) this.writeLine("MotherCell nodes: 0");
         else this.writeLine("Mothercell nodes: " + gameServer.gameMode.mothercells.length);
         this.writeLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
     },
@@ -338,7 +338,8 @@ PlayerCommand.list = {
         this.gameServer.disableSpawn = !this.gameServer.disableSpawn;
         this.writeLine("Last Man Standing has been " + (this.gameServer.disableSpawn ? "enabled." : "disabled."));
     },
-    mass: function(args) {
+    mass: function(args/*, th*/) {
+        //var t = th || this;
         if (!this.playerTracker.OP.enabled) return this.writeLine("[WARN] You must have OP mode to use this command!");
         if (!this.playerTracker.cells.length) return this.writeLine("[ERROR] This command cannot be used when you are dead!");
         var mass = parseInt(args[1]),
@@ -351,7 +352,7 @@ PlayerCommand.list = {
         if (!this.playerTracker.OP.enabled) return this.writeLine("[WARN] You must have OP mode to use this command!");
         var client = this.playerTracker;
         if (!client.cells.length) return this.writeLine("[ERROR] This command cannot be used when you are dead!");
-        if (client.cells.length == 1) return this.writeLine("[ERROR] You are already in one cell!");
+        if (client.cells.length === 1) return this.writeLine("[ERROR] You are already in one cell!");
         client.mergeOverride = !client.mergeOverride;
         this.writeLine("You are " + (client.mergeOverride ? "now" : "no longer") + " merging.");
     },
@@ -360,8 +361,8 @@ PlayerCommand.list = {
         var add = args[1],
             name = args.slice(2, args.length).join(' '),
             player = this.playerTracker;
-        if (isNaN(add) && add != "remove") return this.writeLine("[ERROR] Invalid number of minions to add!");
-        if (player.minion.control && (add == "remove" || !add)) {
+        if (isNaN(add) && add !== "remove") return this.writeLine("[ERROR] Invalid number of minions to add!");
+        if (player.minion.control && (add === "remove" || !add)) {
             player.minion.control = false;
             this.writeLine("Succesfully removed your minions.");
         } else {
@@ -374,7 +375,7 @@ PlayerCommand.list = {
         if (!this.playerTracker.OP.enabled) return this.writeLine("[WARN] You must have OP mode to use this command!");
         if (!client.cells.length) return this.writeLine("[ERROR] This command cannot be used when you are dead!");
         var name = args.slice(1, args.length).join(' ');
-        if (typeof name == 'undefined') return this.writeLine("[ERROR] Please type a valid name!");
+        if (typeof name === 'undefined') return this.writeLine("[ERROR] Please type a valid name!");
         var client = this.playerTracker;
         this.writeLine("Changing your name to " + name + ".");
         client.setName(name);
@@ -438,7 +439,7 @@ PlayerCommand.list = {
                 this.gameServer.addNode(mother);
             }
         }
-        var type = ent == "food" ? "food cells" : ent == "virus" ? "viruses" : ent == "mothercell" ? "mothercells" : "invalid entity";
+        var type = ent === "food" ? "food cells" : ent === "virus" ? "viruses" : ent === "mothercell" ? "mothercells" : "invalid entity";
         this.writeLine("Replaced your cells with " + type + ".");
     },
     reset: function(args) {
@@ -470,7 +471,7 @@ PlayerCommand.list = {
             for (;gameServer.nodesVirus.length;) gameServer.removeNode(gameServer.nodesVirus[0]);
         }
         if ("mothercell" === ent) {
-            if (gameServer.gameMode.ID != 2) return this.writeLine("[WARN] Mothercells can only be cleared in experimental mode!");
+            if (gameServer.gameMode.ID !== 2) return this.writeLine("[WARN] Mothercells can only be cleared in experimental mode!");
             this.writeLine("Removed " + gameServer.gameMode.mothercells.length + " mothercell nodes.");
             for (;gameServer.gameMode.mothercells.length;) gameServer.removeNode(gameServer.gameMode.mothercells[0]);
         }
