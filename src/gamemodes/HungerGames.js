@@ -1,7 +1,7 @@
 'use strict';
-const Tournament = require('./Tournament');
-const Entity = require('../entity');
-const Log = require('../modules/Logger');
+const Tournament = require('./Tournament'),
+    Entity = require('../entity'),
+    Log = require('../modules/Logger');
 
 function HungerGames(gameServer) {
     Tournament.apply(this, Array.prototype.slice.call(arguments));
@@ -10,21 +10,21 @@ function HungerGames(gameServer) {
     this.maxContenders = 12;
     this.baseSpawnPoints = [
         // Right of map
-        {x: 4950,y:-2500},
-        {x: 4950,y:    0},
-        {x: 4950,y: 2500},
+        {x: 4950, y:-2500},
+        {x: 4950, y:    0},
+        {x: 4950, y: 2500},
         // Left of map
-        {x:-4950,y:-2500},
-        {x:-4950,y:    0},
-        {x:-4950,y: 2500},
+        {x:-4950, y:-2500},
+        {x:-4950, y:    0},
+        {x:-4950, y: 2500},
         // Top of map
-        {x:-2500,y: 4950},
-        {x:    0,y: 4950},
-        {x: 2500,y: 4950},
+        {x:-2500, y: 4950},
+        {x:    0, y: 4950},
+        {x: 2500, y: 4950},
         // Bottom of map
-        {x:-2500,y:-4950},
-        {x:    0,y:-4950},
-        {x: 2500,y:-4950},
+        {x:-2500, y:-4950},
+        {x:    0, y:-4950},
+        {x: 2500, y:-4950}
     ];
     this.contenderSpawnPoints;
 }
@@ -32,36 +32,42 @@ function HungerGames(gameServer) {
 module.exports = HungerGames;
 HungerGames.prototype = new Tournament();
 
-HungerGames.prototype.getPos = function () {
-    var pos = {x: 0, y: 0};
+HungerGames.prototype.getPos = function() {
+    var pos = {
+        x: 0,
+        y: 0
+    };
     if (this.contenderSpawnPoints.length > 0) {
         var index = Math.floor(Math.random() * this.contenderSpawnPoints.length);
         pos = this.contenderSpawnPoints[index];
         this.contenderSpawnPoints.splice(index, 1);
     }
-    return {x: pos.x, y: pos.y};
+    return {
+        x: pos.x,
+        y: pos.y
+    };
 };
 
-HungerGames.prototype.spawnFood = function (gameServer, size, pos) {
+HungerGames.prototype.spawnFood = function(gameServer, size, pos) {
     var cell = new Entity.Food(gameServer, null, pos, size);
     cell.color = gameServer.randomColor();
     gameServer.addNode(cell);
 };
 
-HungerGames.prototype.spawnVirus = function (gameServer, pos) {
+HungerGames.prototype.spawnVirus = function(gameServer, pos) {
     var virus = new Entity.Virus(gameServer, null, pos, gameServer.config.virusMinSize);
     gameServer.addNode(virus);
 };
 
-HungerGames.prototype.onPlayerDeath = function (gameServer) {
-    var len = gameServer.nodes.all.length;
+HungerGames.prototype.onPlayerDeath = function(gameServer) {
+    var len = gameServer.nodesAll.length;
     for (var i = 0; i < len; i++) {
-        var node = gameServer.nodes.all[i];
-        if (!node || node.cellType == 0) continue;
+        var node = gameServer.nodesAll[i];
+        if (!node || node.cellType === 0) continue;
     }
 };
 
-HungerGames.prototype.onServerInit = function (gameServer) {
+HungerGames.prototype.onServerInit = function(gameServer) {
     Log.warn("Since the gamemode is HungerGames, it is highly recommended that you don't use the reload command.");
     Log.warn("This is because configs set by the gamemode will be reset to the config.ini values.");
     this.prepare(gameServer);
@@ -73,15 +79,17 @@ HungerGames.prototype.onServerInit = function (gameServer) {
     gameServer.config.playerStartSize = 100;
     gameServer.config.minionStartSize = 100;
     gameServer.config.botStartSize = 100;
-    gameServer.config.foodMinSize = 10;
-    gameServer.config.foodMaxSize = 14.142;
+    gameServer.config.foodMinSize = gameServer.massToSize(2);
+    gameServer.config.foodMaxSize = gameServer.massToSize(3);
     gameServer.config.virusMinAmount = 16;
     gameServer.config.virusMaxAmount = 50;
     gameServer.config.ejectSpawnChance = 0;
     gameServer.config.playerDisconnectTime = 10;
     gameServer.config.borderWidth = 8000;
     gameServer.config.borderHeight = 8000;
-    // TO DO: Fix these functions not calling again when gamePhase = 0 again.
+};
+
+HungerGames.prototype.resetMap = function(gameServer) {
     // 400 mass food
     this.spawnFood(gameServer, 200, {x: 0, y: 0});
     // 80 mass food
@@ -119,14 +127,17 @@ HungerGames.prototype.onServerInit = function (gameServer) {
     this.spawnVirus(gameServer, {x:  2430, y: 810});
     this.spawnVirus(gameServer, {x:  2430, y:-810});
     this.spawnVirus(gameServer, {x: -2430, y:-810});
-    this.spawnVirus(gameServer, {x: -2430, y: 810});
+    this.spawnVirus(gameServer, {x: -2430, y: 810});=
 };
 
-HungerGames.prototype.onPlayerSpawn = function (gameServer, client) {
-    if (this.gamePhase == 0 && this.contenders.length < this.maxContenders) {
+HungerGames.prototype.onPlayerSpawn = function(gameServer, client) {
+    if (this.gamePhase === 0 && this.contenders.length < this.maxContenders) {
         client.color = gameServer.randomColor();
         this.contenders.push(client);
         gameServer.spawnPlayer(client, this.getPos());
-        if (this.contenders.length == this.maxContenders) this.startGamePrep(gameServer);
+        if (this.contenders.length === this.maxContenders) {
+            this.startGamePrep(gameServer);
+            this.resetMap(gameServer);
+        }
     }
 };
