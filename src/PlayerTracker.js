@@ -1,8 +1,6 @@
 'use strict';
 const Packet = require('./packet'),
     BinaryWriter = require('./packet/BinaryWriter');
-    //Vector = require('./modules/Vec2');
-// TO CONSIDER: Make a this.isNewPlayer thingy for the connection message and playerlist
 
 function PlayerTracker(gameServer, socket) {
     this.OP = {
