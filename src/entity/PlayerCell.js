@@ -22,10 +22,10 @@ PlayerCell.prototype.getSpeed = function(dist) {
 };
 
 PlayerCell.prototype.onAdd = function(gameServer) {
-    this.color = gameServer.config.splitRandomColor === 1 ? gameServer.randomColor() : this.owner.color;
+    this.color = gameServer.config.splitRandomColor ? gameServer.randomColor() : this.owner.color;
     this.owner.cells.push(this);
     this.owner.socket.sendPacket(new Packet.AddNode(this.owner, this));
-    if (gameServer.config.unshift === 1) gameServer.nodesPlayer.unshift(this);
+    if (gameServer.config.unshift) gameServer.nodesPlayer.unshift(this);
     else gameServer.nodesPlayer.push(this);
     gameServer.gameMode.onCellAdd(this);
 };
