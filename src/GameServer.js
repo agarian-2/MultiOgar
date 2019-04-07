@@ -598,7 +598,7 @@ GameServer.prototype.mainLoop = function() {
                 else self.resolveCollision(m);
             });
         }
-        if ((this.tickCount % this.config.spawnInterval) === 0) this.spawnCells(this.randomPosition());
+        if ((this.tickCount % this.config.spawnInterval) === 0) this.spawnCells();
         this.gameMode.onTick(this);
         if (((this.tickCount + 3) % 25) === 0) this.updateDecay();
         this.tickCount++;
@@ -804,26 +804,17 @@ GameServer.prototype.randomPosition = function() {
 };
 
 GameServer.prototype.spawnCells = function(player) {
-    var maxCount = this.config.foodMinAmount - this.nodesFood.length,
-        spawnCount = Math.min(maxCount, this.config.foodSpawnAmount);
-    for (var i = 0; i < spawnCount; i++) {
+    for (var i = 0; i < Math.min(this.config.foodMinAmount - this.nodesFood.length, this.config.foodSpawnAmount); i++) {
         var size = this.config.foodMinSize;
-        /*for (var cell of this.nodesFood) {
-            if (cell.getAge() > 200) cell.setSize(14.14);
-            if (cell.getAge() > 400) cell.setSize(17.32);
-            if (cell.getAge() > 600) cell.setSize(20);
-            //console.log(cell.getAge());
-        }*/
         if (this.config.foodMaxSize > size) size = Math.random() * (this.config.foodMaxSize - size) + size;
         var food = new Entity.Food(this, null, this.randomPosition(), size);
         food.color = this.randomColor();
         this.addNode(food);
     }
-    for (maxCount = this.config.virusMinAmount - this.nodesVirus.length, spawnCount = Math.min(maxCount, 2), i = 0; i < spawnCount; i++)
-        if (!this.willCollide(player, this.config.virusMinSize)) {
-            var virus = new Entity.Virus(this, null, player, this.config.virusMinSize);
-            this.addNode(virus);
-        }
+    if (this.nodesVirus.length < this.config.virusMinAmount) {
+        var pos = this.randomPosition();
+        if (!this.willCollide(pos, this.config.virusMinSize)) this.addNode(new Entity.Virus(this, null, pos, this.config.virusMinSize));
+    }
 };
 
 GameServer.prototype.spawnPlayer = function(client, pos) {
