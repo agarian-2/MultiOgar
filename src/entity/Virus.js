@@ -36,24 +36,32 @@ Virus.prototype.onEaten = function(cell) {
     if (!cell.owner) return;
     const config = this.gameServer.config;
     var cellsLeft = (config.virusMaxCells || config.playerMaxCells) - cell.owner.cells.length;
-    if (cellsLeft) {
-        var splitCount,
-            splitMin = config.virusSplitDiv,
-            mass = cell._mass,
-            splits = [];
-        if (mass / cellsLeft < splitMin) {
-            for (splitMass = mass / (splitCount = 2); splitMass > splitMin && 2 * splitCount < cellsLeft;) splitMass = mass / (splitCount *= 2);
-            for (splitMass = mass / (splitCount + 1); splitCount-- > 0;) splits.push(splitMass);
-            return this.explode(cell, splits);
-        }
-        for (var splitMass = mass / 2, massLeft = mass / 2; cellsLeft-- > 0;) {
-            if (massLeft / cellsLeft < splitMin) for (splitMass = massLeft / cellsLeft; cellsLeft-- > 0;) splits.push(splitMass);
-            for (;splitMass >= massLeft && cellsLeft > 0;) splitMass /= 2;
-            splits.push(splitMass);
-            massLeft -= splitMass;
-        }
-        this.explode(cell, splits);
+    if (!cellsLeft) return;
+    var min = config.virusSplitDiv,
+        mass = cell._mass,
+        splits = [],
+        splitCount,
+        splitMass;
+    if (mass / cellsLeft < min) {
+        splitCount = 2;
+        splitMass = mass / splitCount;
+        while (splitMass > min && splitCount * 2 < cellsLeft) splitMass = mass / (splitCount *= 2);
+        splitMass = mass / (splitCount + 1);
+        while (splitCount-- > 0) splits.push(splitMass);
+        return this.explode(cell, splits);
     }
+    splitMass = mass / 2;
+    var massLeft = mass / 2;
+    while (cellsLeft-- > 0) {
+        if (massLeft / cellsLeft < min) {
+            splitMass = massLeft / cellsLeft;
+            while (cellsLeft-- > 0) splits.push(splitMass);
+        }
+        while (splitMass >= massLeft && cellsLeft > 0) splitMass /= 2;
+        splits.push(splitMass);
+        massLeft -= splitMass;
+    }
+    this.explode(cell, splits);
 };
 
 Virus.prototype.explode = function(cell, splits) {
