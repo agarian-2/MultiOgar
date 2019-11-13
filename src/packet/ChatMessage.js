@@ -6,7 +6,7 @@ function ChatMessage(sender, message) {
 
 module.exports = ChatMessage;
 
-ChatMessage.prototype.build = function(protocol) {
+ChatMessage.prototype.build = function (protocol) {
     var text = this.message;
     if (text == null) text = "";
     var name = "SERVER",
