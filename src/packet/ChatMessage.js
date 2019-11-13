@@ -34,13 +34,18 @@ ChatMessage.prototype.build = function (protocol) {
     writer.writeUInt8(0x63);
     var flags = 0;
     if (this.sender == null) flags = 0x80;
-    else if (this.sender.userRole == UserRoleEnum.ADMIN) flags = 0x40;
-    else if (this.sender.userRole == UserRoleEnum.MODER) flags = 0x20;
+    else if (this.sender.userRole === UserRoleEnum.ADMIN) flags = 0x40;
+    else if (this.sender.userRole === UserRoleEnum.MODER) flags = 0x20;
     writer.writeUInt8(flags);
     writer.writeUInt8(color.r >> 0);
     writer.writeUInt8(color.g >> 0);
     writer.writeUInt8(color.b >> 0);
-    if (protocol < 6) writer.writeStringZeroUnicode(name), writer.writeStringZeroUnicode(text);
-    else writer.writeStringZeroUtf8(name), writer.writeStringZeroUtf8(text);
+    if (protocol < 6) {
+        writer.writeStringZeroUnicode(name);
+        writer.writeStringZeroUnicode(text);
+    } else {
+        writer.writeStringZeroUtf8(name);
+        writer.writeStringZeroUtf8(text);
+    }
     return writer.toBuffer();
 };
