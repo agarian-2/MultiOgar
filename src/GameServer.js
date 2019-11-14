@@ -1,5 +1,6 @@
 'use strict';
 // Not sure what to do about the "possible security threat" message, can't fix it since updating WS breaks ws.headers...
+// Coming soon: ES6 conversion.
 const QuadNode = require('./modules/QuadNode.js'),
     BotLoader = require('./ai/BotLoader'),
     WebSocket = require('ws'),
