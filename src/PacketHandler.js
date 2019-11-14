@@ -2,7 +2,6 @@
 const Packet = require("./packet"),
     BinaryReader = require("./packet/BinaryReader"),
     Entity = require("./entity");
-//const Vector = require("./modules/Vec2");
 
 function PacketHandler(gameServer, socket) {
     this.gameServer = gameServer;
@@ -22,7 +21,7 @@ function PacketHandler(gameServer, socket) {
     this.handler = {
         254: this.onProtocol.bind(this)
     };
-    this.minion = this.minion;
+    this.minion = this.socket.playerTracker.minion;
 }
 
 module.exports = PacketHandler;
