@@ -451,13 +451,14 @@ PacketHandler.prototype.process = function() {
 
 PacketHandler.prototype.randomSkin = function() {
     var randomSkins = [],
-        fs = require("fs");
-    if (fs.existsSync("../src/randomskins.txt")) randomSkins = fs.readFileSync("../src/randomskins.txt", "utf8").split(/[\r\n]+/).filter(function (x) {
-        return x != '';
+        fs = require("fs"),
+        skin = null;
+    if (fs.existsSync("../src/randomskins.txt")) randomSkins = fs.readFileSync("../src/randomskins.txt", "utf8").split(/[\r\n]+/).filter(function(x) {
+        return x !== '';
     });
     if (randomSkins.length > 0) {
-        var index = (randomSkins.length * Math.random()) >>> 0,
-            skin = randomSkins[index];
+        var index = (randomSkins.length * Math.random()) >>> 0;
+        skin = randomSkins[index];
     }
     return skin;
 };
