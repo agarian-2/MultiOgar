@@ -322,20 +322,19 @@ PacketHandler.prototype.onKeyN = function() {
 PacketHandler.prototype.onKeyV = function() {
     var client = this.socket.playerTracker;
     if (!client.OP.enabled) return;
-    var check = client.isSpectating || !client.cells.length,
-        gameServer = this.gameServer;
-    for (var cell of client.cells) var pos = {
-        x: client.mouse.x - cell.position.x,
-        y: client.mouse.y - cell.position.y
-    };
-    var angle = 2 * Math.PI * Math.random();
-    if (!check) angle = Math.atan2(pos.x, pos.y);
+    var gameServer = this.gameServer,
+        pos = {
+            x: client.mouse.x - client.centerPos.x,
+            y: client.mouse.y - client.centerPos.y
+        },
+        angle = 2 * Math.PI * Math.random();
+    if (client.cells.length) angle = Math.atan2(pos.x, pos.y);
     var size = gameServer.config.ejectMinSize;
     if (gameServer.config.ejectMaxSize > size) size = Math.random() * (gameServer.config.ejectMaxSize - size) + size;
     var eject = new Entity.EjectedMass(gameServer, null, client.mouse, size);
-    eject.color = (check || gameServer.config.ejectRandomColor === 1) ? gameServer.randomColor() : client.color;
+    eject.color = client.isSpectating || gameServer.config.ejectRandomColor === 1 ? gameServer.randomColor() : client.color;
     gameServer.addNode(eject);
-    eject.setBoost((check ? Math.random() : 1) * gameServer.config.ejectSpeed, angle);
+    eject.setBoost((client.isSpectating ? Math.random() : 1) * gameServer.config.ejectSpeed, angle);
 };
 
 PacketHandler.prototype.rainbowLoop = function() {
