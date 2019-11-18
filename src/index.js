@@ -35,8 +35,8 @@ process.on("uncaughtException", function(error) {
     process.exit(1);
 });
 process.argv.forEach(function(val) {
-    if (val == "--noconsole") showConsole = false;
-    else if (val == "--help") {
+    if (val === "--noconsole") showConsole = false;
+    else if (val === "--help") {
         Log.print("Proper Usage: node index.js");
         Log.print("    --noconsole         Disables the console");
         Log.print("    --help              Help menu.");
