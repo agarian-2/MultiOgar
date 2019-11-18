@@ -114,7 +114,10 @@ PacketHandler.prototype.onKeySpace = function(message) {
 PacketHandler.prototype.onKeyQ = function(message) {
     if (message.length !== 1) return;
     var client = this.socket.playerTracker;
-    if (client.cells.length) client.minion.follow = !client.minion.follow;
+    if (client.cells.length) {
+        client.minion.follow = !client.minion.follow;
+        this.gameServer.sendChatMSG(null, client, "Minions Frozen: " + client.minion.frozen + ".");
+    }
     this.pressQ = true;
 };
 
