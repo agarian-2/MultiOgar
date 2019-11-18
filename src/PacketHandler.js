@@ -116,7 +116,7 @@ PacketHandler.prototype.onKeyQ = function(message) {
     var client = this.socket.playerTracker;
     if (client.cells.length) {
         client.minion.follow = !client.minion.follow;
-        this.gameServer.sendChatMSG(null, client, "Minions Frozen: " + client.minion.frozen + ".");
+        this.gameServer.sendChatMSG(null, client, "Minions Follow Centerpoint: " + client.minion.frozen + ".");
     }
     this.pressQ = true;
 };
