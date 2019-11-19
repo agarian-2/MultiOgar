@@ -216,14 +216,11 @@ PlayerTracker.prototype.updateTick = function() {
     if (this.gameServer.clients.length > 400 && this.isMi) return;
     var config = this.gameServer.config;
     this.updateViewNodes(this.cells.length);
-    var viewBaseX = 0,
-        viewBaseY = 0;
+    var viewBaseX = config.serverViewBaseX,
+        viewBaseY = config.serverViewBaseY;
     if (this.isSpectating) {
         viewBaseX = 2225;
         viewBaseY = 1275;
-    } else {
-        viewBaseX = config.serverViewBaseX;
-        viewBaseY = config.serverViewBaseY;
     }
     var scale = Math.max(this.getScale(), config.serverMinScale),
         width = (viewBaseX / scale) / 2,
