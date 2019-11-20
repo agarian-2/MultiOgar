@@ -1,68 +1,63 @@
-'use strict';
 const Log = require("./Logger"),
     Entity = require("../entity"),
-    GameMode = require("../gamemodes");
+    GameMode = require("../gamemodes"),
+    QuadNode = require('./QuadNode.js');
 
-function Commands() {
-    this.list = {};
-}
-
-module.exports = Commands;
-
-function saveIpBanList(gameServer) {
-    const fs = require("fs");
+const trimName = name => !name ? "An unnamed cell" : name.trim();
+const saveIpBanList = gameServer => {
+    let fs = require("fs");
     try {
-        const banlist = fs.createWriteStream('../src/ipbanlist.txt');
-        gameServer.ipBanList.sort().forEach(function(v) {
+        let banlist = fs.createWriteStream('../src/ipbanlist.txt');
+        gameServer.ipBanList.sort().forEach(v => {
             banlist.write(v + '\n');
         });
         banlist.end();
         Log.info(gameServer.ipBanList.length + " IP ban records saved.");
-    } catch (err) {
-        Log.error(err.stack);
-        Log.error("Failed to save " + '../src/ipbanlist.txt' + ": " + err.message + "!");
+    } catch (e) {
+        Log.error(e.stack);
+        Log.error("Failed to save " + '../src/ipbanlist.txt' + ": " + e.message + "!");
     }
-}
-
-function trimName(name) {
-    return name.trim() || "An unnamed cell";
-}
-
-function ban(gameServer, split, ip) {
-    var ipBin = ip.split('.');
-    if (ipBin.length != 4) return Log.warn("Invalid IP format: " + ip + "!");
+};
+const ban = (gameServer, split, ip) => {
+    let ipBin = ip.split('.');
+    if (ipBin.length !== 4) return Log.warn("Invalid IP format: " + ip + "!");
     gameServer.ipBanList.push(ip);
     if (ipBin[2] === "*" || ipBin[3] === "*") Log.print("The IP sub-net " + ip + " has been banned.");
     else Log.print("The IP " + ip + " has been banned.");
-    gameServer.clients.forEach(function(socket) {
+    gameServer.clients.forEach(socket => {
         if (!socket || !socket.isConnected || !gameServer.checkIpBan(ip) || socket.remoteAddress !== ip) return;
         Commands.list.kill(gameServer, split);
         socket.close(null, "You're banned from the server!");
-        var name = trimName(socket.playerTracker._name);
+        let name = trimName(socket.playerTracker._name);
         Log.print("Banned: \"" + name + "\" with Player ID " + socket.playerTracker.pID + ".");
         gameServer.sendChatMSG(null, null, "Banned \"" + name + "\".");
     }, gameServer);
     saveIpBanList(gameServer);
-}
-
-var fillChar = function(data, char, fieldLength, rTL) {
-    var result = data.toString();
-    if (rTL === 1) for (var i = result.length; i < fieldLength; i++) result = char.concat(result);
-    else for (var i = result.length; i < fieldLength; i++) result = result.concat(char);
+};
+const fillChar = (data, char, fieldLength, rTL) => {
+    let result = data.toString();
+    if (rTL === 1)
+        for (let i = result.length; i < fieldLength; i++) result = char.concat(result);
+    else for (let i = result.length; i < fieldLength; i++) result = result.concat(char);
     return result;
 };
-
-function clientByID(id, gameServer) {
+const clientByID = (id, gameServer) => {
     if (!id) return null;
-    for (var i = 0; i < gameServer.clients.length; i++) {
-        var client = gameServer.clients[i].playerTracker;
+    for (let i = 0; i < gameServer.clients.length; i++) {
+        let client = gameServer.clients[i].playerTracker;
         if (client.pID === id) return client;
     }
     return null;
+};
+
+class Commands {
+    constructor() {
+        this.list = {};
+    }
 }
 
 Commands.list = {
-    help: function() {
+    help: () => {
         Log.print("┌──────────────────────────────┐"),
         Log.print("│  [33mLIST OF AVAILABLE COMMANDS[0m  │"),
         Log.print("├──────────────────────────────┼───────────────────────────────────────────┐"),
@@ -124,7 +119,7 @@ Commands.list = {
         Log.print("│      Quick note: Input \"shortcuts\" for a list of command shortcuts!      │"),
         Log.print("└──────────────────────────────────────────────────────────────────────────┘");
     },
-    shortcuts: function() {
+    shortcuts: () => {
         Log.print("┌─────────────────────────────┐"),
         Log.print("│  [33mLIST OF COMMAND SHORTCUTS[0m  │"),
         Log.print("├─────────────────────────────┼────────────────────────────────────────────┐"),
@@ -143,7 +138,7 @@ Commands.list = {
         Log.print("│ tp                          │ Alias for teleport                         │"),
         Log.print("└─────────────────────────────┴────────────────────────────────────────────┘");
     },
-    gamemodes: function() {
+    gamemodes: () => {
         Log.print("┌───────────────────┐"),
         Log.print("│ [33mLIST OF GAMEMODES[0m │"),
         Log.print("├───────────────────┼───────────────────────────────────────────────────────────────────────────┐"),
@@ -156,7 +151,7 @@ Commands.list = {
         Log.print('│ Last Man Standing │ No players are allowed to respawn. ID: N/A, activate it by running "lms". │'),
         Log.print("└───────────────────┴───────────────────────────────────────────────────────────────────────────┘");
     },
-    ophelp: function() {
+    ophelp: () => {
         Log.print("┌──────────────┐"),
         Log.print("│ [33mOP MODE KEYS[0m │"),
         Log.print("├───┬──────────┴─────────────┐"),
@@ -184,22 +179,22 @@ Commands.list = {
         Log.print("│ [33mX[0m │ Rainbow mode           │"),
         Log.print("└───┴────────────────────────┘");
     },
-    op: function(gameServer, split) {
-        var id = parseInt(split[1], 10);
+    op: (gameServer, split) => {
+        let id = parseInt(split[1], 10),
+            client = clientByID(id, gameServer);
         if (isNaN(id)) return Log.warn("Please specify a valid player ID!");
-        var client = clientByID(id, gameServer);
-        client.OP.enabled = !client.OP.enabled;
-        var OP = client.OP.enabled ? "now" : "no longer";
-        Log.print(trimName(client._name) + " " + OP + " has OP mode.");
         if (client == null) return void Log.warn("Player ID (" + id + ") was not found!");
+        if (client.isBot) return Log.warn("You cannot OP a bot!");
+        if (client.isMinion || client.isMi) return Log.warn("You cannot OP a minion!");
+        client.OP.enabled = !client.OP.enabled;
+        let OP = client.OP.enabled ? "now" : "no longer";
+        Log.print(trimName(client._name) + " " + OP + " has OP mode.");
     },
-    restart: function(gameServer) {
-        var QuadNode = require('./QuadNode.js');
-        for (var socket of gameServer.clients) socket.close();
+    restart: gameServer => {
+        for (let i = 0; i < gameServer.clients.length; i++) gameServer.clients[i].close();
         gameServer.httpServer = gameServer.quadTree = null;
         gameServer.running = true;
         gameServer.lastNodeID = gameServer.lastPlayerID = 1;
-        gameServer.nodesAll = gameServer.nodesPlayer = gameServer.nodesVirus = gameServer.nodesFood = gameServer.nodesEject = gameServer.nodesMoving = [];
         gameServer.commands;
         gameServer.tickCount = 0;
         gameServer.startTime = Date.now();
@@ -209,192 +204,188 @@ Commands.list = {
         for (;gameServer.nodesEject.length;) gameServer.removeNode(gameServer.nodesEject[0]);
         for (;gameServer.nodesFood.length;) gameServer.removeNode(gameServer.nodesFood[0]);
         for (;gameServer.nodesVirus.length;) gameServer.removeNode(gameServer.nodesVirus[0]);
-        Log.info("Restarting server...");
+        gameServer.nodesAll = gameServer.nodesPlayer = gameServer.nodesVirus = gameServer.nodesFood = gameServer.nodesEject = gameServer.nodesMoving = [];
+        Log.warn("Restarting server...");
     },
-    clear: function(gameServer) {
+    clear: () => {
         process.stdout.write("\u001b[2J\u001b[0;0H");
-        Log.info("Console output has been cleared.");
+        Log.print("Console output has been cleared.");
     },
-    chat: function(gameServer, split) {
+    chat: (gameServer, split) => {
         gameServer.broadcastMSG(String(split.slice(1, split.length).join(" ")));
-        Log.print("Succesfully sent your message to all players.");
+        Log.print("Sending your message to all players.");
     },
-    border: function(gameServer, split) {
-        var width = split[1],
+    border: (gameServer, split) => {
+        let width = split[1],
             height = split[2];
         if (isNaN(width) || isNaN(height)) return Log.warn("Please specify a valid border width/height!");
         for (;gameServer.nodesEject.length;) gameServer.removeNode(gameServer.nodesEject[0]);
         for (;gameServer.nodesFood.length;) gameServer.removeNode(gameServer.nodesFood[0]);
         for (;gameServer.nodesVirus.length;) gameServer.removeNode(gameServer.nodesVirus[0]);
         gameServer.setBorder(width, height);
-        var QuadNode = require("./QuadNode.js");
         gameServer.quadTree = new QuadNode(gameServer.border, 64, 32);
-        Log.print("The map size is now (" + width + ", " + height + ").");
+        Log.print("Map borders have been changed to (" + width + ", " + height + ").");
     },
-    reset: function(gameServer, split) {
-        var ent = split[1];
-        if ("ejected" !== ent && "food" !== ent && "virus" !== ent && "mothercell" !== ent && ent) return Log.warn("Specify either 'food', 'virus', 'ejected', or 'mothercell'!");
-        if ("all" === ent || !ent) {
-            Log.print("Removed " + gameServer.nodesAll.length + " nodes.");
+    reset: (gameServer, split) => {
+        let ent = split[1];
+        if (ent !== "all" && ent !== "ejected" && ent !== "food" && ent !== "virus" && ent !== "mothercell") return Log.warn("Specify either 'food', 'virus', 'ejected', or 'mothercell'!");
+        if (ent === "all") {
+            Log.print("Removed " + gameServer.nodesAll.length + " entities.");
             for (;gameServer.nodesAll.length;) gameServer.removeNode(gameServer.nodesAll[0]);
             for (;gameServer.nodesEject.length;) gameServer.removeNode(gameServer.nodesEject[0]);
             for (;gameServer.nodesFood.length;) gameServer.removeNode(gameServer.nodesFood[0]);
             for (;gameServer.nodesVirus.length;) gameServer.removeNode(gameServer.nodesVirus[0]);
-            for (var i = 0; i < gameServer.clients.length; i++) {
-                var playerTracker = gameServer.clients[i].playerTracker;
-                while (playerTracker.cells.length > 0) gameServer.removeNode(playerTracker.cells[0]);
+            for (let i = 0; i < gameServer.clients.length; i++) {
+                let playerTracker = gameServer.clients[i].playerTracker;
+                for (;playerTracker.cells.length;) gameServer.removeNode(playerTracker.cells[0]);
             }
         }
-        if ("ejected" === ent) {
-            Log.print("Removed " + gameServer.nodesEject.length + " ejected nodes.");
+        if (ent === "ejected") {
+            Log.print("Removed " + gameServer.nodesEject.length + " ejected cells.");
             for (;gameServer.nodesEject.length;) gameServer.removeNode(gameServer.nodesEject[0]);
         }
-        if ("food" === ent) {
-            Log.print("Removed " + gameServer.nodesFood.length + " food nodes.");
+        if (ent === "food") {
+            Log.print("Removed " + gameServer.nodesFood.length + " food cells.");
             for (;gameServer.nodesFood.length;) gameServer.removeNode(gameServer.nodesFood[0]);
         }
-        if ("virus" === ent) {
-            Log.print("Removed " + gameServer.nodesVirus.length + " virus nodes.");
+        if (ent === "virus") {
+            Log.print("Removed " + gameServer.nodesVirus.length + " viruses.");
             for (;gameServer.nodesVirus.length;) gameServer.removeNode(gameServer.nodesVirus[0]);
         }
-        if ("mothercell" === ent) {
+        if (ent === "mothercell") {
             if (gameServer.gameMode.ID !== 2) return Log.warn("Mothercells can only be cleared in experimental mode!");
-            Log.print("Removed " + gameServer.gameMode.mothercells.length + " mothercell nodes.");
+            Log.print("Removed " + gameServer.gameMode.mothercells.length + " mothercells.");
             for (;gameServer.gameMode.mothercells.length;) gameServer.removeNode(gameServer.gameMode.mothercells[0]);
         }
     },
-    explode: function(gameServer, split) {
-        var id = parseInt(split[1], 10);
+    explode: (gameServer, split) => {
+        let id = parseInt(split[1], 10),
+            client = clientByID(id, gameServer);
         if (isNaN(id)) return Log.warn("Please specify a valid player ID!");
-        for (var socket of gameServer.clients) {
-            var client = socket.playerTracker;
-            if (client.pID === id) {
-                for (var i = 0; i < client.cells.length; i++) {
-                    for (var cell = client.cells[i]; cell._size > 31.63;) {
-                        var angle = 6.28 * Math.random(),
-                            loss = gameServer.config.ejectMinSize;
-                        if (gameServer.config.ejectMaxSize > loss)
-                            loss = Math.random() * (gameServer.config.ejectMaxSize - loss) + loss;
-                        var size = cell.radius - (loss + 5) * (loss + 5);
-                        cell.setSize(Math.sqrt(size));
-                        var pos = {
-                            x: cell.position.x + angle,
-                            y: cell.position.y + angle
-                        };
-                        var eject = new Entity.EjectedMass(gameServer, null, pos, loss);
-                        if (gameServer.config.ejectRandomColor === 1) eject.color = gameServer.randomColor();
-                        else eject.color = client.color;
-                        eject.setBoost(gameServer.config.ejectSpeed * Math.random(), angle);
-                        gameServer.addNode(eject);
-                    }
-                    cell.setSize(31.63);
-                }
-                if (!client.cells.length) return Log.warn("You can't use this command when a player is dead!");
-                Log.print("Successfully exploded " + trimName(client._name) + ".");
+        if (client == null) return Log.warn("Player ID (" + id + ") was not found!");
+        if (!client.cells.length) return Log.warn("The specified player is not spawned in the game!");
+        for (let cell of client.cells) {
+            while (cell._size > gameServer.massToSize(10)) {
+                let angle = 2 * Math.PI * Math.random(),
+                    loss = gameServer.config.ejectMinSize;
+                if (gameServer.config.ejectMaxSize > loss) loss = Math.random() * (gameServer.config.ejectMaxSize - loss) + loss;
+                let size = cell.radius - (loss + 5) * (loss + 5);
+                cell.setSize(Math.sqrt(size));
+                let pos = {
+                        x: cell.position.x + angle,
+                        y: cell.position.y + angle
+                    },
+                    eject = new Entity.EjectedMass(gameServer, null, pos, loss);
+                eject.color = gameServer.config.ejectRandomColor === 1 ? gameServer.randomColor() : client.color;
+                eject.setBoost(gameServer.config.ejectSpeed * Math.random(), angle);
+                gameServer.addNode(eject);
             }
+            cell.setSize(gameServer.massToSize(10));
         }
-        if (client == null) return void Log.warn("Player ID (" + id + ") was not found!");
+        Log.print("Successfully exploded " + trimName(client._name) + ".");
     },
-    minion: function(gameServer, split) {
-        var id = parseInt(split[1], 10),
+    minion: (gameServer, split) => {
+        let id = parseInt(split[1], 10),
             add = parseInt(split[2], 10),
             name = split.slice(3, split.length).join(' '),
             client = clientByID(id, gameServer);
         if (isNaN(id)) return Log.warn("Please specify a valid player ID!");
-        if (client == null) return void Log.warn("Player ID (" + id + ") was not found!");
-        if (client.isBot || client.isMi) return Log.warn("You cannot give minions to a bot or minion!");
+        if (client == null) return Log.warn("Player ID (" + id + ") was not found!");
+        if (client.isBot || client.isMi) return Log.warn("You cannot add minions to a bot or minion!");
         if (client.minion.control && isNaN(add)) {
-            client.minion.control = false;
+            client.minion = {
+                control: false,
+                split: false,
+                eject: false,
+                frozen: false,
+                collect: false,
+                follow: false
+            };
+            client.minions = [];
             Log.print("Succesfully removed minions for " + trimName(client._name) + ".");
         } else {
             client.minion.control = true;
             if (isNaN(add)) add = 1;
-            for (var i = 0; i < add; i++)
-            gameServer.bots.addMinion(client, name);
+            for (let i = 0; i < add; i++) gameServer.bots.addMinion(client, name);
             Log.print("Added " + add + " minions for " + trimName(client._name) + ".");
         }
         if (client == null) return void Log.warn("Player ID (" + id + ") was not found!");
     },
-    addbot: function(gameServer, split) {
-        var add = parseInt(split[1], 10);
+    addbot: (gameServer, split) => {
+        let add = parseInt(split[1], 10);
         if (isNaN(add)) return Log.warn("Please specify an amount of bots to add!");
-        for (var i = 0; i < add; i++)
-            gameServer.bots.addBot();
+        for (let i = 0; i < add; i++) gameServer.bots.addBot();
         Log.print("Added " + add + " player bots.");
     },
-    ban: function(gameServer, split) {
-        var invalid = "Please specify a valid player ID or IP address!";
-        if (null != split[1]) {
+    ban: (gameServer, split) => {
+        let invalid = "Please specify a valid player ID or IP address!";
+        if (split[1] != null) {
             if (split[1].indexOf(".") >= 0) {
-                var ip = split[1],
+                let ip = split[1],
                     ipSplit = ip.split(".");
-                for (var i in ipSplit)
-                    if (!(i > 1 && "*" == ipSplit[i]) && (isNaN(ipSplit[i]) || ipSplit[i] < 0 || ipSplit[i] >= 256))
-                    return void Log.warn(invalid);
+                for (let i in ipSplit)
+                    if (!(i > 1 && "*" === ipSplit[i]) && (isNaN(ipSplit[i]) || ipSplit[i] < 0 || ipSplit[i] >= 256)) return void Log.warn(invalid);
                 return 4 !== ipSplit.length ? void Log.warn(invalid) : void ban(gameServer, split, ip);
             }
-            var id = parseInt(split[1], 10);
+            let id = parseInt(split[1], 10);
             if (isNaN(id)) return Log.warn(invalid);
             else {
-                ip = null;
-                for (var client of gameServer.clients) {
-                    if (null != client && client.isConnected && client.playerTracker.pID === id) {
+                let ip = null;
+                for (let client of gameServer.clients)
+                    if (client != null && client.isConnected && client.playerTracker.pID === id) {
                         ip = client._socket.remoteAddress;
                         break;
                     }
-                }
-                ip ? ban(gameServer, split, ip) : Log.warn("Player ID " + id + " not found!");
+                if (ip) ban(gameServer, split, ip);
+                else Log.warn("Player ID " + id + " not found!");
             }
         } else Log.warn(invalid);
     },
-    banlist: function(gameServer) {
+    banlist: gameServer => {
         Log.print("Showing " + gameServer.ipBanList.length + " banned IPs: "),
         Log.print(" IP              | IP "),
         Log.print("───────────────────────────────────");
-        for (var i = 0; i < gameServer.ipBanList.length; i += 2) {
-            Log.print(" " + fillChar(gameServer.ipBanList[i], " ", 15) + " | " +
-                (gameServer.ipBanList.length === i + 1 ? "" : gameServer.ipBanList[i + 1])
-            );
-        }
+        for (let i = 0; i < gameServer.ipBanList.length; i += 2)
+            Log.print(" " + fillChar(gameServer.ipBanList[i], " ", 15) + " | " + (gameServer.ipBanList.length === i + 1 ? "" : gameServer.ipBanList[i + 1]));
     },
-    kickbot: function(gameServer, split) {
-        var toRemove = parseInt(split[1], 10);
+    kickbot: (gameServer, split) => {
+        let toRemove = parseInt(split[1], 10);
         if (isNaN(toRemove)) toRemove = gameServer.clients.length;
-        var removed = 0;
-        for (var i = 0; i < gameServer.clients.length; i++) {
-            if (gameServer.clients[i].isConnected != null) continue;
-            if (gameServer.clients[i].playerTracker.isMi) continue;
-            gameServer.clients[i].close();
+        let removed = 0;
+        for (let client of gameServer.clients) {
+            if (client.isConnected != null) continue;
+            if (client.playerTracker.isMi) continue;
+            client.close();
             removed++;
             if (removed >= toRemove) break;
         }
-        if (!removed) Log.warn("No bots are connected to the server!");
+        if (!removed) Log.warn("No bots are in the server!");
         else Log.print("Kicked " + removed + " bots.");
     },
-    kickmi: function(gameServer, split) {
-        var toRemove = parseInt(split[1], 10);
+    kickmi: (gameServer, split) => {
+        let toRemove = parseInt(split[1], 10);
         if (isNaN(toRemove)) toRemove = gameServer.clients.length;
-        var removed = 0;
-        for (var i = 0; i < gameServer.clients.length; i++) {
-            if (!gameServer.clients[i].playerTracker.isMi) continue;
-            gameServer.clients[i].close();
+        let removed = 0;
+        for (let client of gameServer.clients) {
+            if (!client.playerTracker.isMi) continue;
+            client.close();
             removed++;
             if (removed >= toRemove) break;
         }
-        if (!removed) Log.warn("No minions are connected to the server!");
+        if (!removed) Log.warn("No minions are in the server!");
         else Log.print("Kicked " + removed + " minions.");
     },
-    board: function(gameServer, split) {
-        var newLB = [];
-        var input = split[1];
-        var maxLB = gameServer.config.serverMaxLB;
+    board: (gameServer, split) => {
+        let newLB = [],
+            input = split[1],
+            maxLB = gameServer.config.serverMaxLB;
         if (split.length > maxLB + 1) return Log.warn("The limit for lines of text on the leaderboard is " + maxLB + "!");
-        for (var i = 1; i < split.length; i++) {
+        for (let i = 1; i < split.length; i++) {
             if (split[i]) newLB[i - 1] = split[i];
             else newLB[i - 1] = " ";
         }
         gameServer.gameMode.packetLB = 48;
-        gameServer.gameMode.updateLB = function(gameServer) {
+        gameServer.gameMode.updateLB = gameServer => {
             gameServer.leaderboard = newLB;
             gameServer.leaderboardType = 48;
         };
@@ -402,32 +393,32 @@ Commands.list = {
             Log.print("Successfully changed leaderboard values.");
             Log.print("Enter 'board reset' to reset leaderboard.");
         } else {
-            var gameMode = GameMode.get(gameServer.gameMode.ID);
+            let gameMode = GameMode.get(gameServer.gameMode.ID);
             gameServer.gameMode.packetLB = gameMode.packetLB;
             gameServer.gameMode.updateLB = gameMode.updateLB;
             Log.print("Successfully reset leaderboard.");
         }
     },
-    change: function(gameServer, split) {
+    change: (gameServer, split) => {
         if (split.length < 3) return Log.warn("Please specify a valid value for this config!");
-        var key = split[1],
+        let key = split[1],
             value = split[2];
         if (value.indexOf('.') !== -1) value = parseFloat(value);
         else value = parseInt(value, 10);
-        if (value == null || isNaN(value))
-            return Log.warn("Invalid value: " + value + "!");
-        if (!gameServer.config.hasOwnProperty(key))
-            return Log.warn("Unknown config value: " + key + "!");
+        if (value == null || isNaN(value)) return Log.warn("Invalid value: " + value + "!");
+        if (!gameServer.config.hasOwnProperty(key)) return Log.warn("Unknown config value: " + key + "!");
         gameServer.config[key] = value;
         gameServer.config.playerMinSize = Math.max(32, gameServer.config.playerMinSize);
         Log.setVerbosity(gameServer.config.logVerbosity);
         Log.setFileVerbosity(gameServer.config.logFileVerbosity);
-        Log.print("Set " + key + " = " + gameServer.config[key]);
+        Log.print("Set " + key + " to " + gameServer.config[key]);
     },
-    color: function(gameServer, split) {
-        var id = parseInt(split[1], 10);
+    color: (gameServer, split) => {
+        let id = parseInt(split[1], 10),
+            client = clientByID(id, gameServer);
         if (isNaN(id)) return Log.warn("Please specify a valid player ID!");
-        var color = {
+        if (client == null) return Log.warn("Player ID (" + id + ") was not found!");
+        let color = {
             r: 0,
             g: 0,
             b: 0
@@ -435,208 +426,181 @@ Commands.list = {
         color.r = Math.max(Math.min(parseInt(split[2], 10), 255), 0);
         color.g = Math.max(Math.min(parseInt(split[3], 10), 255), 0);
         color.b = Math.max(Math.min(parseInt(split[4], 10), 255), 0);
-        for (var socket of gameServer.clients) {
-            var client = socket.playerTracker;
-            if (client.pID === id) {
-                if (!client.cells.length) return Log.warn("You can't use this command when a player is dead!");
-                if (isNaN(color.r) || isNaN(color.g) || isNaN(color.b)) return Log.warn("Please specify a valid RGB color!");
-                client.color = color;
-                for (var cell of client.cells) cell.color = color;
-                Log.print("Changed " + trimName(client._name) + "'s color to (" + color.r + ", " + color.g + ", " + color.b + ").");
-            }
-        }
-        if (client == null) return void Log.warn("Player ID (" + id + ") was not found!");
+        if (!client.cells.length) return Log.warn("The specified player is not spawned in the game!");
+        if (isNaN(color.r) || isNaN(color.g) || isNaN(color.b)) return Log.warn("Please specify a valid RGB color!");
+        client.color = color;
+        for (let cell of client.cells) cell.color = color;
+        Log.print("Changed " + trimName(client._name) + "'s color to (" + color.r + ", " + color.g + ", " + color.b + ").");
     },
-    exit: function(gameServer) {
+    exit: gameServer => {
         gameServer.broadcastMSG("The server is closing!");
         Log.warn("Closing server...");
         gameServer.wsServer.close();
         process.exit(1);
     },
-    kick: function(gameServer, split) {
-        var id = parseInt(split[1], 10);
+    kick: (gameServer, split) => {
+        let id = parseInt(split[1], 10);
         if (isNaN(id)) return Log.warn("Please specify a valid player ID!");
-        var count = 0;
-        gameServer.clients.forEach(function(socket) {
+        let count = 0;
+        gameServer.clients.forEach(socket => {
             if (socket.isConnected === false) return;
             if (id !== 0 && socket.playerTracker.pID !== id) return;
             Commands.list.kill(gameServer, split);
             socket.close(1000, "You were kicked from server!");
-            var name = trimName(socket.playerTracker._name);
-            Log.print("Kicked \"" + name + "\"");
-            gameServer.sendChatMSG(null, null, "Kicked \"" + name + "\".");
+            let name = trimName(socket.playerTracker._name);
+            Log.print("Kicked \"" + name + "\" from the server.");
+            gameServer.sendChatMSG(null, null, "Kicked \"" + name + "\" from the server.");
             count++;
         }, this);
-        if (count) return;
+        if (count > 0) return;
         if (!id) Log.warn("Please specify a valid IP!");
         else Log.warn("Player ID (" + id + ") was not found!");
     },
-    kill: function(gameServer, split) {
-        var id = parseInt(split[1], 10);
+    kill: (gameServer, split) => {
+        let id = parseInt(split[1], 10),
+            client = clientByID(id, gameServer);
         if (isNaN(id)) return Log.warn("Please specify a valid player ID!");
-        var count = 0;
-        for (var socket of gameServer.clients) {
-            var client = socket.playerTracker;
-            if (client.pID === id) {
-                if (!client.cells.length) return Log.warn("You can't use this command when a player is dead!");
-                for (;client.cells.length;) {
-                    gameServer.removeNode(client.cells[0]);
-                    count++;
-                }
-            }
+        if (client == null) return Log.warn("Player ID (" + id + ") was not found!");
+        let count = 0;
+        if (!client.cells.length) return Log.warn("The specified player is not spawned in the game!");
+        while (client.cells.length > 0) {
+            gameServer.removeNode(client.cells[0]);
+            count++;
         }
         Log.print("Killed " + trimName(client._name) + " and removed " + count + " cells.");
-        if (client == null) return void Log.warn("Player ID (" + id + ") was not found!");
     },
-    killall: function(gameServer) {
-        var count = 0;
-        for (var i = 0; i < gameServer.clients.length; i++) {
-            var client = gameServer.clients[i].playerTracker;
-            while (client.cells.length > 0) {
-                gameServer.removeNode(client.cells[0]);
-                count++;
-            }
+    killall: gameServer => {
+        let pCount = 0,
+            bCount = 0,
+            mCount = 0;
+        for (let client of gameServer.clients) {
+            if (client.playerTracker.isBot) bCount++;
+            else if (client.playerTracker.isMi) mCount++;
+            else pCount++;
+            while (client.playerTracker.cells.length > 0) gameServer.removeNode(client.playerTracker.cells[0]);
         }
-        Log.print("Killed " + count + " cells.");
+        Log.print("Killed " + pCount + " players, " + bCount + " bots, and " + mCount + " minions.");
     },
-    mass: function(gameServer, split) {
-        var id = parseInt(split[1], 10);
+    mass: (gameServer, split) => {
+        let id = parseInt(split[1], 10),
+            client = clientByID(id, gameServer),
+            mass = parseInt(split[2], 10);
         if (isNaN(id)) return Log.warn("Please specify a valid player ID!");
-        var mass = parseInt(split[2], 10);
+        if (client == null) return Log.warn("Player ID (" + id + ") was not found!");
         if (isNaN(mass)) return Log.warn("Please specify a valid mass number!");
-        var size = Math.sqrt(100 * mass);
-        for (var socket of gameServer.clients) {
-            var client = socket.playerTracker;
-            if (client.pID === id) {
-                if (!client.cells.length) return Log.warn("You can't use this command when a player is dead!");
-                for (var cell of client.cells) cell.setSize(size);
-                Log.print("Set mass of " + trimName(client._name) + " to " + (size * size / 100).toFixed(3) + ".");
-            }
-        }
-        if (client == null) return void Log.warn("Player ID (" + id + ") was not found!");
+        let size = Math.sqrt(100 * mass);
+        if (!client.cells.length) return Log.warn("The specified player is not spawned in the game!");
+        for (let cell of client.cells) cell.setSize(size);
+        Log.print("Set mass of " + trimName(client._name) + " to " + (size * size / 100).toFixed(3) + ".");
     },
-    calc: function(gameServer, split) {
-        var num = parseInt(split[1], 10);
+    calc: (gameServer, split) => {
+        let num = parseInt(split[1], 10);
         if (isNaN(num)) return Log.warn("Please specify a valid number!");
-        var to = split[2];
-        if (to !== "toSize" && to !== "toMass") return Log.warn('Please specify either "toMass" or "toSize"!');
-        if (to === "toMass") Log.print("The specified size is " + num * num / 100 + " in mass.");
+        let to = split[2];
+        if (to !== "mass" && to !== "size") return Log.warn('Please specify either "mass" or "size"!');
+        if (to === "mass") Log.print("The specified size is " + num * num / 100 + " in mass.");
         else Log.print("The specified mass is " + (Math.sqrt(num * 100)).toFixed(6) + " in size.");
     },
-    spawnmass: function(gameServer, split) {
-        var id = parseInt(split[1], 10);
+    spawnmass: (gameServer, split) => {
+        let id = parseInt(split[1], 10),
+            client = clientByID(id, gameServer);
         if (isNaN(id)) return Log.warn("Please specify a valid player ID!");
-        var mass = Math.max(parseInt(split[2], 10), 9),
+        if (client == null) return Log.warn("Player ID (" + id + ") was not found!");
+        let mass = Math.max(parseInt(split[2], 10), 9),
             size = Math.sqrt(100 * mass);
         if (isNaN(mass)) return Log.warn("Please specify a valid mass!");
-        var client = clientByID(id, gameServer);
         client.spawnMass = size;
         Log.print("Set spawnMass of " + trimName(client._name) + " to " + (size * size / 100).toFixed(3) + ".");
-        if (client == null) return void Log.warn("Player ID (" + id + ") was not found!");
     },
-    speed: function(gameServer, split) {
-        var id = parseInt(split[1], 10),
+    speed: (gameServer, split) => {
+        let id = parseInt(split[1], 10),
+            client = clientByID(id, gameServer),
             speed = parseInt(split[2], 10);
         if (isNaN(id)) return Log.warn("Please specify a valid player ID!");
+        if (client == null) return Log.warn("Player ID (" + id + ") was not found!");
         if (isNaN(speed)) return Log.warn("Please specify a valid speed!");
-        var client = clientByID(id, gameServer);
-        if (client == null) return void Log.warn("Player ID (" + id + ") was not found!");
         client.customSpeed = speed;
         Log.print("Set base speed mult of " + trimName(client._name) + " to " + !speed ? gameServer.config.playerSpeed : speed + ".");
     },
-    merge: function(gameServer, split) {
-        var id = parseInt(split[1], 10);
+    merge: (gameServer, split) => {
+        let id = parseInt(split[1], 10),
+            client = clientByID(id, gameServer);
         if (isNaN(id)) return Log.warn("Please specify a valid player ID!");
-        for (var socket of gameServer.clients) {
-            var client = socket.playerTracker;
-            if (client.pID === id) {
-                if (!client.cells.length) return Log.warn("You can't use this command when a player is dead!");
-                if (client.cells.length == 1) return Log.warn("Client already has one cell!");
-                client.mergeOverride = !client.mergeOverride;
-                Log.print(trimName(client._name) + " is " + (client.mergeOverride ? "now" : "no longer") + " merging.");
-            }
-        }
-        if (client == null) return void Log.warn("Player ID (" + id + ") was not found!");
+        if (client == null) return Log.warn("Player ID (" + id + ") was not found!");
+        if (!client.cells.length) return Log.warn("The specified player is not spawned in the game!");
+        if (client.cells.length === 1) return Log.warn("This player is already merged!");
+        client.mergeOverride = !client.mergeOverride;
+        Log.print(trimName(client._name) + " is " + (client.mergeOverride ? "now" : "no longer") + " merging.");
     },
-    rec: function(gameServer, split) {
-        var id = parseInt(split[1], 10);
+    rec: (gameServer, split) => {
+        let id = parseInt(split[1], 10),
+            client = clientByID(id, gameServer);
         if (isNaN(id)) return Log.warn("Please specify a valid player ID!");
-        var client = clientByID(id, gameServer);
+        if (client == null) return Log.warn("Player ID (" + id + ") was not found!");
         client.recMode = !client.recMode;
         Log.print(trimName(client._name) + " is " + (client.recMode ? "now" : "no longer") + " in rec mode.");
-        if (client == null) return void Log.warn("Player ID (" + id + ") was not found!");
     },
-    split: function(gameServer, n) {
-        var id = parseInt(n[1], 10),
-            amount = parseInt(n[2], 10);
+    split: (gameServer, split) => {
+        let id = parseInt(split[1], 10),
+            client = clientByID(id, gameServer),
+            amount = parseInt(split[2], 10);
         if (isNaN(id)) return Log.warn("Please specify a valid player ID!");
+        if (client == null) return Log.warn("Player ID (" + id + ") was not found!");
         if (isNaN(amount)) return Log.warn("Please specify a valid split count!");
         if (amount > gameServer.config.playerMaxCells) amount = gameServer.config.playerMaxCells;
-        for (var socket of gameServer.clients) {
-            var client = socket.playerTracker;
-            if (client.pID === id) {
-                if (!client.cells.length) return Log.warn("You can't use this command when a player is dead!");
-                if (client.cells.length >= gameServer.config.playerMaxCells) return Log.warn("That player has reached the splitting limit of " + gameServer.config.playerMaxCells + "!");
-                for (var i = 0; i < amount; i++) gameServer.splitCells(client);
-                Log.print("Forced " + trimName(client._name) + " to split " + amount + " times.");
-            }
-        }
-        if (client == null) return void Log.warn("Player ID (" + id + ") was not found!");
+        if (!client.cells.length) return Log.warn("The specified player is not spawned in the game!");
+        if (client.cells.length >= gameServer.config.playerMaxCells) return Log.warn("That player has reached the splitting limit of " + gameServer.config.playerMaxCells + "!");
+        for (let i = 0; i < amount; i++) gameServer.splitCells(client);
+        Log.print("Forced " + trimName(client._name) + " to split " + amount + " times.");
     },
-    name: function(gameServer, split) {
-        var id = parseInt(split[1], 10);
+    name: (gameServer, split) => {
+        let id = parseInt(split[1], 10),
+            client = clientByID(id, gameServer),
+            name = split.slice(2, split.length).join(' ');
         if (isNaN(id)) return Log.warn("Please specify a valid player ID!");
-        var name = split.slice(2, split.length).join(' ');
-        if (typeof name == 'undefined') return Log.warn("Please type a valid name!");
-        for (var socket of gameServer.clients) {
-            var client = socket.playerTracker;
-            if (client.pID === id) {
-                if (!client.cells.length) return Log.warn("You can't use this command when a player is dead!");
-                Log.print("Changing " + trimName(client._name) + " to " + name + ".");
-                client.setName(name);
-            }
-        }
-        if (client == null) return void Log.warn("Player ID (" + id + ") was not found!");
+        if (client == null) return Log.warn("Player ID (" + id + ") was not found!");
+        if (typeof name === 'undefined') return Log.warn("Please type a valid name!");
+        if (!client.cells.length) return Log.warn("The specified player is not spawned in the game!");
+        Log.print("Changing " + trimName(client._name) + " to " + trimName(name) + ".");
+        client.setName(name);
     },
-    unban: function(gameServer, split) {
+    unban: (gameServer, split) => {
         if (split.length < 2 || !split[1] || split[1].trim().length < 1) return Log.warn("Please specify a valid IP!");
-        var ip = split[1].trim(),
+        let ip = split[1].trim(),
             index = gameServer.ipBanList.indexOf(ip);
         if (index < 0) return Log.warn("The specified IP " + ip + " is not in the ban list!");
         gameServer.ipBanList.splice(index, 1);
         saveIpBanList(gameServer);
         Log.print("Unbanned IP: " + ip + ".");
     },
-    playerlist: function(gameServer) {
+    playerlist: gameServer => {
         if (gameServer.clients.length <= 0) return Log.warn("No bots or players are currently connected to the server!");
         Log.info("Total players connected: " + gameServer.clients.length + '.');
         Log.print(" ID     | IP              |  P  | CELLS | SCORE  |   POSITION   | " + fillChar('NICK', ' ', gameServer.config.playerMaxNick) + " ");
         Log.print(fillChar('', '─', ' ID     | IP              | CELLS | SCORE  |   POSITION   |   |  '.length + gameServer.config.playerMaxNick));
-        var sockets = gameServer.clients.slice(0);
-        sockets.sort(function(a, b) {
-            return a.playerTracker.pID - b.playerTracker.pID;
-        });
-        for (var i = 0; i < sockets.length; i++) {
-            var socket = sockets[i],
+        let sockets = gameServer.clients.slice(0);
+        sockets.sort((a, b) => a.playerTracker.pID - b.playerTracker.pID);
+        for (let i = 0; i < sockets.length; i++) {
+            let socket = sockets[i],
                 client = socket.playerTracker,
                 id = fillChar(client.pID, ' ', 6, 1),
-                ip = client.isMi ? "[MINION]" : client.isBot ? "[BOT]" : socket.isConnected === true ? socket.remoteAddress : "[UNKNOWN]";
+                ip = client.isMi ? "[MINION]" : client.isBot ? "[BOT]" : socket.isConnected ? socket.remoteAddress : "[UNKNOWN]";
             ip = fillChar(ip, ' ', 15);
-            var protocol = gameServer.clients[i].packetHandler.protocol;
+            let protocol = gameServer.clients[i].packetHandler.protocol;
             if (!protocol) protocol = "N/A";
-            else protocol += protocol < 10 ? "  " : " ";
-            var nick = '',
+            else protocol += " ";
+            let nick = '',
                 cells = '',
                 score = '',
                 position = '',
                 data = '',
                 target = null;
             if (socket.closeReason != null) {
-                var reason = "[DISCONNECTED] ";
+                let reason = "[DISCONNECTED] ";
                 if (socket.closeReason.code) reason += "[" + socket.closeReason.code + "] ";
                 if (socket.closeReason.message) reason += socket.closeReason.message;
                 Log.print(" " + id + " | " + ip + " |  " + protocol + " | " + reason);
-            } else if (!socket.packetHandler.protocol && socket.isConnected === true && !client.isMi) Log.print(" " + id + " | " + ip + " |  " + protocol + " | " + "[CONNECTING]");
+            } else if (!socket.packetHandler.protocol && socket.isConnected && !client.isMi) Log.print(" " + id + " | " + ip + " |  " + protocol + " | " + "[CONNECTING]");
             else if (client.isSpectating) {
                 nick = "in free-roam";
                 if (!client.freeRoam) {
@@ -653,268 +617,234 @@ Commands.list = {
                 position = fillChar(client.centerPos.x >> 0, ' ', 5, 1) + ', ' + fillChar(client.centerPos.y >> 0, ' ', 5, 1);
                 Log.print(" " + id + " | " + ip + " |  " + protocol + " | " + cells + " | " + score + " | " + position + " | " + nick);
             } else {
-                data = fillChar('Player is currently dead', '-', ' | CELLS | SCORE  | POSITION    '.length + gameServer.config.playerMaxNick, 1);
+                data = fillChar('DEAD OR NOT PLAYING', '-', ' | CELLS | SCORE  | POSITION    '.length + gameServer.config.playerMaxNick, 1);
                 Log.print(" " + id + " | " + ip + " |  " + protocol + " | " + data);
             }
         }
     },
-    getcolor: function(gameServer, split) {
-        var id = parseInt(split[1], 10);
+    getcolor: (gameServer, split) => {
+        let id = parseInt(split[1], 10),
+            client = clientByID(id, gameServer);
         if (isNaN(id)) return Log.print("Please specify a valid player ID!");
-        for (var socket of gameServer.clients) {
-            var client = socket.playerTracker;
-            if (client.pID === id) {
-                if (!client.cells.length) return Log.warn("You can't use this command when a player is dead!");
-                Log.print("That player's RGB color is (" + client.color.r + ", " + client.color.g + ", " + client.color.b + ").");
-            }
-        }
-        if (client == null) return void Log.warn("Player ID (" + id + ") was not found!");
+        if (client == null) return Log.warn("Player ID (" + id + ") was not found!");
+        if (!client.cells.length) return Log.warn("The specified player is not spawned in the game!");
+        Log.print(trimName(client._name) + "'s RGB color is (" + client.color.r + ", " + client.color.g + ", " + client.color.b + ").");
     },
-    lms: function(gameServer) {
+    lms: gameServer => {
         gameServer.disableSpawn = !gameServer.disableSpawn;
-        Log.print("Last man standing has " + (gameServer.disableSpawn ? "begun." : "ended."));
+        Log.print("Last man standing has been " + (gameServer.disableSpawn ? "enabled" : "disabled") + ".");
     },
-    pause: function(gameServer) {
+    pause: gameServer => {
         gameServer.running = !gameServer.running;
-        var state = gameServer.running ? "Unpaused" : "Paused";
-        Log.print(state + " the game.");
+        Log.print((gameServer.running ? "Unpaused" : "Paused") + " the game.");
     },
-    freeze: function(gameServer, split) {
-        var id = parseInt(split[1], 10);
+    freeze: (gameServer, split) => {
+        let id = parseInt(split[1], 10),
+            client = clientByID(id, gameServer);
         if (isNaN(id)) return Log.warn("Please specify a valid player ID!");
-        for (var socket of gameServer.clients) {
-            var client = socket.playerTracker;
-            if (client.pID === id) {
-                if (!client.cells.length) return Log.warn("You can't use this command when a player is dead!");
-                client.frozen = !client.frozen;
-                Log.print((client.frozen ? "Froze " : "Unfroze") + trimName(client._name) + ".");
-            }
-        }
-        if (client == null) return void Log.warn("Player ID (" + id + ") was not found!");
+        if (client == null) return Log.warn("Player ID (" + id + ") was not found!");
+        if (!client.cells.length) return Log.warn("The specified player is not spawned in the game!");
+        client.frozen = !client.frozen;
+        Log.print((client.frozen ? "Froze " : "Unfroze ") + trimName(client._name) + ".");
     },
-    reload: function(gameServer) {
+    reload: gameServer => {
         gameServer.loadConfig();
         gameServer.loadBanList();
         Log.print("Reloaded the configuration files succesully.");
     },
-    status: function(gameServer) {
-        var ini = require('./ini.js'),
+    status: gameServer => {
+        let ini = require('./ini.js'),
             humans = 0,
             bots = 0,
             mem = process.memoryUsage();
-        for (var i = 0; i < gameServer.clients.length; i++) {
-            if ('_socket' in gameServer.clients[i]) humans++;
+        for (let client of gameServer.clients) {
+            if ('_socket' in client) humans++;
             else bots++;
         }
-        var scores = [];
-        for (var socket of gameServer.clients) {
-            var totalMass = 0,
-                client = socket.playerTracker;
-            for (var cell of client.cells) totalMass += gameServer.sizeToMass(cell._size);
+        let scores = [];
+        for (let client of gameServer.clients) {
+            let totalMass = 0;
+            for (let cell of client.playerTracker.cells) totalMass += gameServer.sizeToMass(cell._size);
             scores.push(totalMass);
         }
         if (!gameServer.clients.length) scores = [0];
         Log.print("Connected Players: " + gameServer.clients.length + "/" + gameServer.config.serverMaxConnect + "."),
         Log.print("Total Players: " + humans + "."),
         Log.print("Total Bots: " + bots + "."),
-        Log.print("Average Score: " + (scores.reduce(function(x, y) {
-            return x + y;
-        }) / scores.length).toFixed(2) + "."),
+        Log.print("Average Score: " + (scores.reduce((x, y) => x + y) / scores.length).toFixed(2) + "."),
         Log.print("Server Uptime: " + Math.floor(process.uptime() / 60) + " minutes."),
         Log.print("Current Memory Usage: " + Math.round(mem.heapUsed / 1048576 * 10) / 10 + "/" + Math.round(mem.heapTotal / 1048576 * 10) / 10 + " MB."),
         Log.print("Current Game Mode: " + gameServer.gameMode.name + "."),
         Log.print("Current Update Time: " + gameServer.updateTimeAvg.toFixed(3) + " ms (" + ini.getLagMessage(gameServer.updateTimeAvg) + ").");
     },
-    teleport: function(gameServer, split) {
-        var id = parseInt(split[1], 10);
+    teleport: (gameServer, split) => {
+        let id = parseInt(split[1], 10),
+            client = clientByID(id, gameServer);
         if (isNaN(id)) return Log.warn("Please specify a valid player ID!");
-        var pos = {
+        if (client == null) return Log.warn("Player ID (" + id + ") was not found!");
+        let pos = {
             x: parseInt(split[2], 10),
             y: parseInt(split[3], 10)
         };
         if (isNaN(pos.x) || isNaN(pos.y)) return Log.warn("Invalid coordinates!");
-        for (var socket of gameServer.clients) {
-            var client = socket.playerTracker;
-            if (client.pID === id) {
-                if (!client.cells.length) return Log.warn("You can't use this command when a player is dead!");
-                for (var cell of client.cells) {
-                    cell.position.x = pos.x,
-                    cell.position.y = pos.y,
-                    gameServer.updateNodeQuad(cell);
-                }
-                Log.print("Teleported " + trimName(client._name) + " to (" + pos.x + " , " + pos.y + ").");
-            }
+        if (!client.cells.length) return Log.warn("The specified player is not spawned in the game!");
+        for (let cell of client.cells) {
+            cell.position.x = pos.x;
+            cell.position.y = pos.y;
+            gameServer.updateNodeQuad(cell);
         }
-        if (client == null) return void Log.warn("Player ID (" + id + ") was not found!");
+        Log.print("Teleported " + trimName(client._name) + " to (" + pos.x + " , " + pos.y + ").");
     },
-    spawn: function(gameServer, split) {
-        var entity = split[1];
-        if (entity !== "virus" && entity !== "food" && entity !== "mothercell") return Log.warn("Please specify either virus, food, or mothercell!");
-        var pos = {
-            x: parseInt(split[2], 10),
-            y: parseInt(split[3], 10)
-        };
-        var mass = parseInt(split[4], 10);
-        if (isNaN(pos.x) || isNaN(pos.y)) return Log.warn("Invalid coordinates");
-        if (entity === "virus") var size = gameServer.config.virusMinSize;
+    spawn: (gameServer, split) => {
+        let entity = split[1];
+        if (entity !== "virus" && entity !== "food" && entity !== "mothercell") return Log.warn('Please specify either "virus", "food", or "mothercell"!');
+        let pos = {
+                x: parseInt(split[2], 10),
+                y: parseInt(split[3], 10)
+            },
+            mass = parseInt(split[4], 10);
+        if (isNaN(pos.x) || isNaN(pos.y)) return Log.warn("Invalid coordinates!");
+        let size = 1;
+        if (entity === "virus") size = gameServer.config.virusMinSize;
         else if (entity === "mothercell") size = gameServer.config.virusMinSize * 2.5;
         else if (entity === "food") size = gameServer.config.foodMinMass;
         if (!isNaN(mass)) size = Math.sqrt(mass * 100);
         if (entity === "virus") {
-            var virus = new Entity.Virus(gameServer, null, pos, size);
+            let virus = new Entity.Virus(gameServer, null, pos, size);
             gameServer.addNode(virus);
             Log.print("Spawned a virus at (" + pos.x + " , " + pos.y + ").");
         } else if (entity === "food") {
-            var food = new Entity.Food(gameServer, null, pos, size);
+            let food = new Entity.Food(gameServer, null, pos, size);
             food.color = gameServer.randomColor();
             gameServer.addNode(food);
             Log.print("Spawned a food cell at (" + pos.x + " , " + pos.y + ").");
         } else if (entity === "mothercell") {
-            var mother = new Entity.MotherCell(gameServer, null, pos, size);
+            if (gameServer.gameMode.ID !== 2) return Log.warn("Mothercells can only be spawned in experimental mode!");
+            let mother = new Entity.MotherCell(gameServer, null, pos, size);
             gameServer.addNode(mother);
             Log.print("Spawned a mothercell at (" + pos.x + " , " + pos.y + ").");
         }
     },
-    replace: function(gameServer, split) {
-        var id = parseInt(split[1], 10);
+    replace: (gameServer, split) => {
+        let id = parseInt(split[1], 10),
+            client = clientByID(id, gameServer),
+            entity = split[2];
         if (isNaN(id)) return Log.warn("Please specify a valid player ID!");
-        var ent = split[2];
-        if ((ent !== "virus" && ent !== "food" && ent !== "mothercell") || !ent) return Log.warn("Please specify either virus, food, or mothercell!");
-        for (var socket of gameServer.clients) {
-            var client = socket.playerTracker;
-            if (client.pID === id) {
-                if (!client.cells.length) return Log.warn("You can't use this command when a player is dead!");
-                while (client.cells.length > 0) {
-                    var cell = client.cells[0];
-                    gameServer.removeNode(cell);
-                    if (ent === "virus") {
-                        var virus = new Entity.Virus(gameServer, null, cell.position, cell._size);
-                        gameServer.addNode(virus);
-                    } else if (ent === "food") {
-                        var food = new Entity.Food(gameServer, null, cell.position, cell._size);
-                        food.color = gameServer.randomColor();
-                        gameServer.addNode(food);
-                    } else if (ent === "mothercell") {
-                        var mother = new Entity.MotherCell(gameServer, null, cell.position, cell._size);
-                        gameServer.addNode(mother);
-                    }
-                }
-                if (ent === "food") Log.print("Replaced " + trimName(client._name) + " with food cells.");
-                else if (ent === "virus") Log.print("Replaced " + trimName(client._name) + " with viruses.");
-                else if (ent === "mothercell") Log.print("Replaced " + trimName(client._name) + " with mother cells.");
-            }
-        }
-        if (client == null) return void Log.warn("Player ID (" + id + ") was not found!");
-    },
-    virus: function(gameServer, split) {
-        var id = parseInt(split[1], 10);
-        if (isNaN(id)) return Log.warn("Please specify a valid player ID!")
-        for (var socket of gameServer.clients) {
-            var client = socket.playerTracker;
-            if (client.pID === id) {
-                var virus = new Entity.Virus(gameServer, null, client.centerPos, gameServer.config.virusMinSize);
-                if (!client.cells.length) return Log.warn("You can't use this command when a player is dead!");
+        if (client == null) return Log.warn("Player ID (" + id + ") was not found!");
+        if (entity !== "virus" && entity !== "food" && entity !== "mothercell") return Log.warn('Please specify either "virus", "food", or "mothercell"!');
+        if (!client.cells.length) return Log.warn("The specified player is not spawned in the game!");
+        if (entity === "mothercell" && gameServer.gameMode.ID !== 2) return Log.warn("Mothercells can only be spawned in experimental mode!");
+        while (client.cells.length > 0) {
+            let cell = client.cells[0];
+            if (entity === "virus") {
+                let virus = new Entity.Virus(gameServer, null, cell.position, cell._size);
                 gameServer.addNode(virus);
-                Log.print("Spawned a virus under " + trimName(client._name) + ".");
+            } else if (entity === "food") {
+                let food = new Entity.Food(gameServer, null, cell.position, cell._size);
+                food.color = gameServer.randomColor();
+                gameServer.addNode(food);
+            } else if (entity === "mothercell") {
+                let mother = new Entity.MotherCell(gameServer, null, cell.position, cell._size);
+                gameServer.addNode(mother);
             }
+            gameServer.removeNode(cell);
         }
-        if (client == null) return void Log.warn("Player ID (" + id + ") was not found!");
+        if (entity === "food") Log.print("Replaced " + trimName(client._name) + " with food cells.");
+        else if (entity === "virus") Log.print("Replaced " + trimName(client._name) + " with viruses.");
+        else if (entity === "mothercell") Log.print("Replaced " + trimName(client._name) + " with mothercells.");
     },
-    debug: function(gameServer) {
+    virus: (gameServer, split) => {
+        let id = parseInt(split[1], 10),
+            client = clientByID(id, gameServer);
+        if (isNaN(id)) return Log.warn("Please specify a valid player ID!");
+        if (client == null) return Log.warn("Player ID (" + id + ") was not found!");
+        let virus = new Entity.Virus(gameServer, null, client.centerPos, gameServer.config.virusMinSize);
+        if (!client.cells.length) return Log.warn("The specified player is not spawned in the game!");
+        gameServer.addNode(virus);
+        Log.print("Spawned a virus under " + trimName(client._name) + ".");
+    },
+    debug: gameServer => {
         Log.print("-----------------NODES------------------"),
-        Log.print("Total nodes: " + gameServer.nodesAll.length),
-        Log.print("Player nodes: " + gameServer.nodesPlayer.length),
-        Log.print("Virus nodes: " + gameServer.nodesVirus.length),
-        Log.print("Ejected nodes: " + gameServer.nodesEject.length),
-        Log.print("Food nodes: " + gameServer.nodesFood.length);
-        Log.print("MotherCell nodes: " + gameServer.gameMode.ID === 2 ? gameServer.gameMode.mothercells.length : "0");
+        Log.print("Total nodes: " + gameServer.nodesAll.length + "."),
+        Log.print("Player nodes: " + gameServer.nodesPlayer.length + "."),
+        Log.print("Virus nodes: " + gameServer.nodesVirus.length + "."),
+        Log.print("Ejected nodes: " + gameServer.nodesEject.length + "."),
+        Log.print("Food nodes: " + gameServer.nodesFood.length + ".");
+        Log.print("MotherCell nodes: " + (gameServer.gameMode.ID === 2 ? gameServer.gameMode.mothercells.length : "0") + ".");
         Log.print("----------------------------------------");
     },
-    mute: function(gameServer, split) {
-        var id = parseInt(split[1], 10);
+    mute: (gameServer, split) => {
+        let id = parseInt(split[1], 10),
+            client = clientByID(id, gameServer);
         if (isNaN(id)) return Log.warn("Please specify a valid player ID!");
-        var client = clientByID(id, gameServer);
-        if (client == null) return void Log.warn("That player ID (" + id + ") is non-existant!");
-        Log.print(client.isMuted ? "Muted " : "Unmuted " + trimName(client._name) + " successfully.");
+        if (client == null) return Log.warn("That player ID (" + id + ") is non-existant!");
         client.isMuted = !client.isMuted;
+        Log.print(client.isMuted ? "Muted " : "Unmuted " + trimName(client._name) + " successfully.");
     },
-    gamemode: function(gameServer,split) {
+    gamemode: (gameServer,split) => {
         try {
-            var id = parseInt(split[1], 10);
-            var gameMode = GameMode.get(id);
+            let id = parseInt(split[1], 10),
+                gameMode = GameMode.get(id);
             gameServer.gameMode.onChange(gameServer);
             gameServer.gameMode = gameMode;
             gameServer.gameMode.onServerInit(gameServer);
-            //gameServer.config.serverGamemode = id;
-            Log.print("Changed the game mode to " + gameServer.gameMode.name);
+            Log.print("Changed the game mode to " + gameServer.gameMode.name + ".");
         } catch (e) {
             Log.warn("Invalid game mode selected!");
         }
     },
-    eval: function(_gameServer, split) { // gonna make the output later
+    eval: (gameServer, split) => { // gonna make the output later
         try {
-            const string = split.slice(1, split.length).join(' '),
-                gameServer = _gameServer;
+            const string = split.slice(1, split.length).join(' ');
             Log.info('Running code...');
             Log.print('[OUTPUT] ' + eval(string));
-        } catch (err) {
+        } catch (e) {
             Log.warn("An error occurred while trying to run the code:");
-            Log.error(err);
+            Log.error(e);
         }
     },
-    /*k: function() { // lol
-        console.log("k"),
-        console.log("k"),
-        console.log("k"),
-        console.log("k"),
-        console.log("k"),
-        console.log("k"),
-        console.log("k"),
-        console.log("k"),
-        console.log("k"),
-        console.log("k"),
-        console.log("k");
-    },*/
-    pl: function(gameServer) {
+    pl: gameServer => {
         Commands.list.playerlist(gameServer);
     },
-    m: function(gameServer, split) {
+    m: (gameServer, split) => {
         Commands.list.mass(gameServer, split);
     },
-    e: function(gameServer, split) {
+    e: (gameServer, split) => {
         Commands.list.explode(gameServer, split);
     },
-    sm: function(gameServer, split) {
+    sm: (gameServer, split) => {
         Commands.list.spawnmass(gameServer, split);
     },
-    ka: function(gameServer, split) {
+    ka: (gameServer, split) => {
         Commands.list.killall(gameServer);
     },
-    k: function(gameServer, split) {
+    k: (gameServer, split) => {
         Commands.list.kill(gameServer, split);
     },
-    s: function(gameServer, split) {
+    s: (gameServer, split) => {
         Commands.list.speed(gameServer, split);
     },
-    f: function(gameServer, split) {
+    f: (gameServer, split) => {
         Commands.list.freeze(gameServer, split);
     },
-    ab: function(gameServer, split) {
+    ab: (gameServer, split) => {
         Commands.list.addbot(gameServer, split);
     },
-    kb: function(gameServer, split) {
+    kb: (gameServer, split) => {
         Commands.list.kickbot(gameServer, split);
     },
-    c: function(gameServer, split) {
+    c: (gameServer, split) => {
         Commands.list.change(gameServer, split);
     },
-    tp: function(gameServer, split) {
+    tp: (gameServer, split) => {
         Commands.list.teleport(gameServer, split);
     },
-    rp: function(gameServer, split) {
+    rp: (gameServer, split) => {
         Commands.list.replace(gameServer, split);
     },
-    stats: function(gameServer) {
+    stats: gameServer => {
         Commands.list.status(gameServer);
     }
 };
+
+module.exports = Commands;
