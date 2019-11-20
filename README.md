@@ -1,9 +1,11 @@
 # MultiOgar-Edited
 
 Agar.io Private Servers:
+
 [![Discord](https://discordapp.com/api/guilds/407210435721560065/embed.png?style=banner2)](https://discord.gg/27v68Sb)
 
 My Discord server:
+
 [![Discord](https://discordapp.com/api/guilds/442747837403627530/embed.png?style=banner2)](https://discord.gg/JrwVT3F)
 
 An invite to my Discord server (IDK how to add the fancy embed lol): https://discord.gg/JrwVT3F
