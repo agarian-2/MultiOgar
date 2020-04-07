@@ -216,7 +216,7 @@ PlayerCommand.list = {
         this.writeLine("Virus nodes: " + gameServer.nodesVirus.length),
         this.writeLine("Ejected nodes: " + gameServer.nodesEject.length),
         this.writeLine("Food nodes: " + gameServer.nodesFood.length);
-        this.writeLine("Mothercell nodes: " + gameServer.gameMode.ID === 2 ? gameServer.gameMode.mothercells.length : 0);
+        //this.writeLine("Mothercell nodes: " + gameServer.gameMode.ID === 2 ? gameServer.gameMode.mothercells.length : 0);
         this.writeLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
     },
     explode: function() {
