@@ -1,4 +1,3 @@
-'use strict';
 function ChatMessage(sender, message) {
     this.sender = sender;
     this.message = message;
