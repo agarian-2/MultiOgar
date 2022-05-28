@@ -45,11 +45,11 @@ Vec2.prototype.clone = function() {
     return new Vec2(this.x, this.y);
 };
 
-Vec2.prototype.dist = function() {
+Vec2.prototype.dist = function(d) {
     return ~~d.x * ~~d.x + ~~d.y * ~~d.y;
 };
 
-Vec2.prototype.sqDist = function() {
+Vec2.prototype.sqDist = function(d) {
     return Math.sqrt(d.x * d.x + d.y * d.y);
 };
 
