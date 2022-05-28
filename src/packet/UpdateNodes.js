@@ -1,4 +1,3 @@
-'use strict';
 function UpdateNodes(playerTracker, add, upd, eat, del) {
     this.playerTracker = playerTracker;
     this.addNodes = add;
@@ -16,7 +15,7 @@ UpdateNodes.prototype.build = function(protocol) {
     writer.writeUInt8(0x10);
     this.writeEatItems(writer);
     if (protocol < 5) this.writeUpdateItems4(writer);
-    else if (protocol == 5) this.writeUpdateItems5(writer);
+    else if (protocol === 5) this.writeUpdateItems5(writer);
     else if (protocol < 11) this.writeUpdateItems6(writer);
     else this.writeUpdateItems11(writer);
     this.writeRemoveItems(writer, protocol);
@@ -26,7 +25,7 @@ UpdateNodes.prototype.build = function(protocol) {
 UpdateNodes.prototype.writeUpdateItems4 = function(writer) {
     for (var i = 0; i < this.updNodes.length; i++) {
         var node = this.updNodes[i];
-        if (node.nodeID == 0) continue;
+        if (node.nodeID === 0) continue;
         writer.writeUInt32((node.nodeID ^ this.playerTracker.scrambleID) >>> 0);
         writer.writeUInt16(node.position.x + this.playerTracker.scrambleX >> 0);
         writer.writeUInt16(node.position.y + this.playerTracker.scrambleY >> 0);
@@ -44,7 +43,7 @@ UpdateNodes.prototype.writeUpdateItems4 = function(writer) {
     }
     for (var i = 0; i < this.addNodes.length; i++) {
         node = this.addNodes[i];
-        if (node.nodeID == 0) continue;
+        if (node.nodeID === 0) continue;
         var cellName = null;
         if (node.owner) cellName = node.owner._nameUnicode;
         writer.writeUInt32((node.nodeID ^ this.playerTracker.scrambleID) >>> 0);
@@ -69,7 +68,7 @@ UpdateNodes.prototype.writeUpdateItems4 = function(writer) {
 UpdateNodes.prototype.writeUpdateItems5 = function(writer) {
     for (var i = 0; i < this.updNodes.length; i++) {
         var node = this.updNodes[i];
-        if (node.nodeID == 0) continue;
+        if (node.nodeID === 0) continue;
         writer.writeUInt32((node.nodeID ^ this.playerTracker.scrambleID) >>> 0);
         writer.writeUInt32(node.position.x + this.playerTracker.scrambleX >> 0);
         writer.writeUInt32(node.position.y + this.playerTracker.scrambleY >> 0);
@@ -87,7 +86,7 @@ UpdateNodes.prototype.writeUpdateItems5 = function(writer) {
     }
     for (var i = 0; i < this.addNodes.length; i++) {
         node = this.addNodes[i];
-        if (node.nodeID == 0) continue;
+        if (node.nodeID === 0) continue;
         var skinName = null,
             cellName = null;
         if (node.owner) {
@@ -118,7 +117,7 @@ UpdateNodes.prototype.writeUpdateItems5 = function(writer) {
 UpdateNodes.prototype.writeUpdateItems6 = function(writer) {
     for (var i = 0; i < this.updNodes.length; i++) {
         var node = this.updNodes[i];
-        if (node.nodeID == 0) continue;
+        if (node.nodeID === 0) continue;
         writer.writeUInt32((node.nodeID ^ this.playerTracker.scrambleID) >>> 0);
         writer.writeUInt32(node.position.x + this.playerTracker.scrambleX >> 0);
         writer.writeUInt32(node.position.y + this.playerTracker.scrambleY >> 0);
@@ -139,7 +138,7 @@ UpdateNodes.prototype.writeUpdateItems6 = function(writer) {
     }
     for (var i = 0; i < this.addNodes.length; i++) {
         node = this.addNodes[i];
-        if (node.nodeID == 0) continue;
+        if (node.nodeID === 0) continue;
         var skinName = null,
             cellName = null;
         if (node.owner) {
@@ -174,7 +173,7 @@ UpdateNodes.prototype.writeUpdateItems6 = function(writer) {
 UpdateNodes.prototype.writeUpdateItems11 = function(writer) {
     for (var i = 0; i < this.updNodes.length; i++) {
         var node = this.updNodes[i];
-        if (node.nodeID == 0) continue;
+        if (node.nodeID === 0) continue;
         writer.writeUInt32((node.nodeID ^ this.playerTracker.scrambleID) >>> 0);
         writer.writeUInt32(node.position.x + this.playerTracker.scrambleX >> 0);
         writer.writeUInt32(node.position.y + this.playerTracker.scrambleY >> 0);
@@ -196,7 +195,7 @@ UpdateNodes.prototype.writeUpdateItems11 = function(writer) {
     }
     for (var i = 0; i < this.addNodes.length; i++) {
         node = this.addNodes[i];
-        if (node.nodeID == 0) continue;
+        if (node.nodeID === 0) continue;
         var skinName = null,
             cellName = null;
         if (node.owner) {
