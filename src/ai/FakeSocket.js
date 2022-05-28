@@ -1,4 +1,3 @@
-'use strict';
 function FakeSocket(server) {
     this.server = server;
     this.isCloseReq = false;
