@@ -1,4 +1,3 @@
-'use strict';
 function AddNode(playerTracker, item) {
     this.playerTracker = playerTracker;
     this.item = item;
