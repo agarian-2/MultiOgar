@@ -1,16 +1,15 @@
-'use strict';
-const BinaryWriter = require("./BinaryWriter");
+var BinaryWriter = require("./BinaryWriter");
 
-function UpdatePos(playerTracker, x, y, scale) {
-    this.playerTracker = playerTracker;
+function UpdatePosition(playerTracker, x, y, scale) {
+    this.playerTracker = playerTracker,
     this.x = x;
     this.y = y;
     this.scale = scale;
 }
 
-module.exports = UpdatePos;
+module.exports = UpdatePosition;
 
-UpdatePos.prototype.build = function(protocol) {
+UpdatePosition.prototype.build = function() {
     var writer = new BinaryWriter();
     writer.writeUInt8(0x11);
     writer.writeFloat(this.x + this.playerTracker.scrambleX);
