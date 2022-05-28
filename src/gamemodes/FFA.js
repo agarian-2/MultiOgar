@@ -1,5 +1,4 @@
-'use strict';
-const Mode = require("./Mode");
+var Mode = require("./Mode");
 
 function FFA() {
     Mode.apply(this, Array.prototype.slice.call(arguments));
@@ -18,7 +17,8 @@ FFA.prototype.onPlayerSpawn = function(gameServer, player) {
 
 FFA.prototype.updateLB = function(gameServer, lb) {
     gameServer.leaderboardType = this.packetLB;
-    for (var i = 0, pos = 0; i < gameServer.clients.length; i++) {
+    var pos = 0;
+    for (var i = 0; i < gameServer.clients.length; i++) {
         var client = gameServer.clients[i].playerTracker;
         if (client.isRemoved || !client.cells.length || client.socket.isConnected === false) continue;
         for (var j = 0; j < pos; j++)
