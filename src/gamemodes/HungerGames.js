@@ -1,7 +1,6 @@
-'use strict';
-const Tournament = require('./Tournament'),
-    Entity = require('../entity'),
-    Log = require('../modules/Logger');
+var Tournament = require("./Tournament"),
+    Entity = require("../entity"),
+    Log = require("../modules/Logger");
 
 function HungerGames(gameServer) {
     Tournament.apply(this, Array.prototype.slice.call(arguments));
@@ -127,7 +126,25 @@ HungerGames.prototype.resetMap = function(gameServer) {
     this.spawnVirus(gameServer, {x:  2430, y: 810});
     this.spawnVirus(gameServer, {x:  2430, y:-810});
     this.spawnVirus(gameServer, {x: -2430, y:-810});
-    this.spawnVirus(gameServer, {x: -2430, y: 810});=
+    this.spawnVirus(gameServer, {x: -2430, y: 810});
+    /*this.baseSpawnPoints = [
+        // Right of map
+        {x: 4950, y:-2500},
+        {x: 4950, y:    0},
+        {x: 4950, y: 2500},
+        // Left of map
+        {x:-4950, y:-2500},
+        {x:-4950, y:    0},
+        {x:-4950, y: 2500},
+        // Top of map
+        {x:-2500, y: 4950},
+        {x:    0, y: 4950},
+        {x: 2500, y: 4950},
+        // Bottom of map
+        {x:-2500, y:-4950},
+        {x:    0, y:-4950},
+        {x: 2500, y:-4950}
+    ];*/
 };
 
 HungerGames.prototype.onPlayerSpawn = function(gameServer, client) {
