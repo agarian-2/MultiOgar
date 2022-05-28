@@ -714,8 +714,8 @@ Commands.list = {
                 var reason = "[DISCONNECTED] ";
                 if (socket.closeReason.code) reason += "[" + socket.closeReason.code + "] ";
                 if (socket.closeReason.message) reason += socket.closeReason.message;
-                Log.print(" " + id + " | " + ip + " |  " + protocol + " | " + reason);
-            } else if (!socket.packetHandler.protocol && socket.isConnected && !client.isMi) Log.print(" " + id + " | " + ip + " |  " + protocol + " | " + "[CONNECTING]");
+                Log.print(" " + id + " | " + ip + " | " + protocol + " | " + reason);
+            } else if (!socket.packetHandler.protocol && socket.isConnected && !client.isMi) Log.print(" " + id + " | " + ip + " | " + protocol + " | " + "[CONNECTING]");
             else if (client.isSpectating) {
                 nick = "in free-roam";
                 if (!client.freeRoam) {
@@ -723,17 +723,17 @@ Commands.list = {
                     if (target) nick = trimName(target._name);
                 }
                 data = fillChar(trimName(client._name) + " is spectating " + nick, "-", " | CELLS | SCORE  | POSITION    ".length + gameServer.config.playerMaxNick, 1);
-                Log.print(" " + id + " | " + ip + " |  " + protocol + " | " + data);
+                Log.print(" " + id + " | " + ip + " | " + protocol + " | " + data);
             } else if (client.cells.length) {
                 target = client.getSpecTarget();
                 nick = fillChar(trimName(client._name), " ", gameServer.config.playerMaxNick);
                 cells = fillChar(client.cells.length, " ", 5, 1);
                 score = fillChar(client._score / 100 >> 0, " ", 6, 1);
                 position = fillChar(client.centerPos.x >> 0, " ", 5, 1) + ", " + fillChar(client.centerPos.y >> 0, " ", 5, 1);
-                Log.print(" " + id + " | " + ip + " |  " + protocol + " | " + cells + " | " + score + " | " + position + " | " + nick);
+                Log.print(" " + id + " | " + ip + " | " + protocol + " | " + cells + " | " + score + " | " + position + " | " + nick);
             } else {
                 data = fillChar("DEAD OR NOT PLAYING", "-", " | CELLS | SCORE  | POSITION    ".length + gameServer.config.playerMaxNick, 1);
-                Log.print(" " + id + " | " + ip + " |  " + protocol + " | " + data);
+                Log.print(" " + id + " | " + ip + " | " + protocol + " | " + data);
             }
         }
     },
