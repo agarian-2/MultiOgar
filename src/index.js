@@ -22,7 +22,7 @@ function parseCommands(str) {
         first = split[0].toLowerCase(),
         execute = Commands.list[first];
     if (typeof execute !== "undefined") execute(gameServer, split);
-    else Log.warn("That is an invalid Command!");
+    else Log.warn("That is an invalid command.");
 }
 
 Log.start();
