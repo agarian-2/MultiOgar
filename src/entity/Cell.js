@@ -1,5 +1,3 @@
-'use strict';
-
 function Cell(gameServer, owner, pos, size) {
     this.gameServer = gameServer;
     this.owner = owner;
@@ -47,7 +45,7 @@ Cell.prototype.setSize = function(size) {
 };
 
 Cell.prototype.canEat = function() {
-    return 0;
+    return false;
 };
 
 Cell.prototype.getAge = function() {
