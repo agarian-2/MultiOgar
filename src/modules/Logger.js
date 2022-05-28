@@ -1,8 +1,27 @@
-'use strict';
-const fs = require("fs"),
+var fs = require("fs"),
     util = require("util"),
     EOL = require("os").EOL,
-    LogLevelEnum = require("../enum/LogLevelEnum");
+    LogLevelEnum = require("../enum/LogLevelEnum"),
+    logFolder = "./logs",
+    logBackupFolder = "./logs/LogBackup",
+    logFileName = "ServerLog",
+    //colorBlack = "[30m",
+    colorRed = "[31m",
+    //colorGreen = "[32m",
+    colorYellow = "[33m",
+    //colorBlue = "[34m",
+    //colorMagenta = "[35m",
+    //colorCyan = "[36m",
+    colorWhite = "[37m",
+    colorBright = "[1m",
+    consoleLog = null,
+    logVerbosity = LogLevelEnum.DEBUG,
+    logFileVerbosity = LogLevelEnum.DEBUG,
+    writeError = 0,
+    writeCounter = 0,
+    writeShutdown = 0,
+    writeStarted = 0,
+    writeQueue = [];
 
 function debug(message) {
     writeCon(colorWhite, LogLevelEnum.DEBUG, message);
@@ -80,11 +99,11 @@ function writeCon(color, level, message) {
     if (level > logVerbosity) return;
     message = util.format(message);
     var prefix = "";
-    if (level == LogLevelEnum.DEBUG) prefix = "[DEBUG] ";
-    else if (level == LogLevelEnum.INFO) prefix = "[INFO] ";
-    else if (level == LogLevelEnum.WARN) prefix = "[WARN] ";
-    else if (level == LogLevelEnum.ERROR) prefix = "[ERROR] ";
-    else if (level == LogLevelEnum.FATAL) prefix = "[FATAL] ";
+    if (level === LogLevelEnum.DEBUG) prefix = "[DEBUG] ";
+    else if (level === LogLevelEnum.INFO) prefix = "[INFO] ";
+    else if (level === LogLevelEnum.WARN) prefix = "[WARN] ";
+    else if (level === LogLevelEnum.ERROR) prefix = "[ERROR] ";
+    else if (level === LogLevelEnum.FATAL) prefix = "[FATAL] ";
     process.stdout.write(color + prefix + message + "\u001B[0m" + EOL);
 }
 
@@ -101,13 +120,13 @@ function writeLog(level, message) {
     prefix += "[" + getTimeString() + "] ";
     writeQueue.push(prefix + message + EOL);
     if (writeShutdown) flushSync();
-    else if (writeCounter == 0) flushAsync();
+    else if (writeCounter === 0) flushAsync();
 }
 
 function flushAsync() {
-    if (writeShutdown || consoleLog == null || writeQueue.length == 0) return;
+    if (writeShutdown || consoleLog == null || writeQueue.length === 0) return;
     writeCounter++;
-    consoleLog.write(writeQueue.shift(), function() {writeCounter--; flushAsync()});
+    consoleLog.write(writeQueue.shift(), function () {writeCounter--; flushAsync()});
 }
 
 function flushSync() {
@@ -127,7 +146,7 @@ function start() {
     if (writeStarted) return;
     writeStarted = 1;
     try {
-        console.log = function(message) {
+        console.log = function (message) {
             print(message);
         };
         var timeString = getDateString(),
@@ -141,13 +160,13 @@ function start() {
             fs.renameSync(fileName, fileName2);
         }
         fs.writeFileSync(fileName, "=== Started " + timeString + " ===" + EOL);
-        var file = fs.createWriteStream(fileName, {flags: 'a'});
-        file.on('open', function() {
+        var file = fs.createWriteStream(fileName, {flags: "a"});
+        file.on("open", function () {
             if (writeShutdown) return file.close();
             consoleLog = file;
             flushAsync();
         });
-        file.on('error', function(err) {
+        file.on("error", function (err) {
             writeError = 1;
             consoleLog = null;
             writeCon(colorRed + colorBright, LogLevelEnum.ERROR, err.message);
@@ -195,24 +214,3 @@ module.exports.getVerbosity = function() {
 module.exports.getFileVerbosity = function() {
     return logFileVerbosity;
 };
-
-var logVerbosity = LogLevelEnum.DEBUG,
-    logFileVerbosity = LogLevelEnum.DEBUG,
-    writeError = 0,
-    writeCounter = 0,
-    writeShutdown = 0,
-    writeStarted = 0,
-    writeQueue = [],
-    logFolder = "./logs",
-    logBackupFolder = "./logs/LogBackup",
-    logFileName = "ServerLog",
-    consoleLog = null,
-    colorBlack = "[30m",
-    colorRed = "[31m",
-    colorGreen = "[32m",
-    colorYellow = "[33m",
-    colorBlue = "[34m",
-    colorMagenta = "[35m",
-    colorCyan = "[36m",
-    colorWhite = "[37m",
-    colorBright = "[1m";
