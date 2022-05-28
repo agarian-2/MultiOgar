@@ -1,5 +1,4 @@
-'use strict';
-const PlayerTracker = require("../PlayerTracker");
+var PlayerTracker = require("../PlayerTracker");
 
 function MinionPlayer() {
     PlayerTracker.apply(this, Array.prototype.slice.call(arguments));
@@ -10,7 +9,7 @@ module.exports = MinionPlayer;
 
 MinionPlayer.prototype = new PlayerTracker;
 
-MinionPlayer.prototype.checkConnection = function() {
+MinionPlayer.prototype.checkConnection = function() { // TO DO (maybe): Minion color change with X
     if (this.gameServer.config.minionSameColor) {
         this.color = this.owner.color;
         this.cells.forEach(function(item) {
@@ -19,14 +18,14 @@ MinionPlayer.prototype.checkConnection = function() {
     }
     if (this.socket.isCloseReq) {
         for (;this.cells.length;) this.gameServer.removeNode(this.cells[0]);
-        return void (this.isRemoved = true);
+        return this.isRemoved = true;
     }
     if (!this.cells.length) {
         this.gameServer.gameMode.onPlayerSpawn(this.gameServer, this);
         if (!this.cells.length) this.socket.close();
     }
     if (this.owner.socket.isConnected === false || !this.owner.minion.control) this.socket.close();
-    this.frozen = this.owner.minion.frozen;
+    this.frozen = this.owner.minion.frozen ? true : false;
     if (this.owner.minion.split) this.socket.packetHandler.pressSpace = true;
     if (this.owner.minion.eject) this.socket.packetHandler.pressW = true;
     if (this.owner.minion.follow) this.mouse = this.owner.centerPos;
