@@ -1,6 +1,5 @@
-'use strict';
-const Mode = require('./Mode'),
-    Log = require('../modules/Logger');
+var Mode = require("./Mode"),
+    Log = require("../modules/Logger");
 
 function Tournament() {
     Mode.apply(this, Array.prototype.slice.call(arguments));
@@ -10,7 +9,7 @@ function Tournament() {
     this.isTournament = true;
     this.prepTime = 5;
     this.endTime = 15;
-    this.autoFill = false;
+    this.autoFill = 0;
     this.autoFillPlayers = 1;
     this.dcTime = 0;
     this.gamePhase = 0;
@@ -24,7 +23,7 @@ function Tournament() {
 module.exports = Tournament;
 Tournament.prototype = new Mode();
 
-Tournament.prototype.startGamePrep = function(gameServer) {
+Tournament.prototype.startGamePrep = function() {
     this.gamePhase = 1;
     this.timer = this.prepTime;
 };
@@ -35,7 +34,7 @@ Tournament.prototype.startGame = function(gameServer) {
     gameServer.config.playerDisconnectTime = this.dcTime;
 };
 
-Tournament.prototype.endGame = function(gameServer) {
+Tournament.prototype.endGame = function() {
     this.winner = this.contenders[0];
     this.gamePhase = 3;
     this.timer = this.endTime;
@@ -53,11 +52,7 @@ Tournament.prototype.fillBots = function(gameServer) {
 };
 
 Tournament.prototype.prepare = function(gameServer) {
-    for (var i = 0; i < gameServer.nodesAll.length; i++) {
-        var node = gameServer.nodesAll[0];
-        if (!node) continue;
-        gameServer.removeNode(node);
-    }
+    for (;gameServer.nodesAll.length;) gameServer.removeNode(gameServer.nodesAll[0]);
     for (var i = 0; i < gameServer.clients.length; i++) {
         if (gameServer.clients[i].isConnected != null) continue;
         gameServer.clients[i].close();
@@ -66,7 +61,7 @@ Tournament.prototype.prepare = function(gameServer) {
     this.gamePhase = 0;
     if (gameServer.config.tourneyAutoFill > 0) {
         this.timer = gameServer.config.tourneyAutoFill;
-        this.autoFill = true;
+        this.autoFill = 1;
         this.autoFillPlayers = gameServer.config.tourneyAutoFillTime;
     }
     this.dcTime = gameServer.config.playerDisconnectTime;
@@ -76,8 +71,6 @@ Tournament.prototype.prepare = function(gameServer) {
     this.maxContenders = gameServer.config.tourneyMaxPlayers;
     this.timeLimit = gameServer.config.tourneyTimeLimit * 60;
 };
-
-Tournament.prototype.onPlayerDeath = function(gameServer) {};
 
 Tournament.prototype.formatTime = function(time) {
     if (time < 0) return "0:00";
@@ -97,8 +90,6 @@ Tournament.prototype.onServerInit = function(gameServer) {
     this.prepare(gameServer);
 };
 
-Tournament.prototype.onCellAdd = function(gameServer) {};
-
 Tournament.prototype.onPlayerSpawn = function(gameServer, client) {
     if (this.gamePhase === 0 && this.contenders.length < this.maxContenders) {
         client.color = gameServer.randomColor();
@@ -114,7 +105,6 @@ Tournament.prototype.onCellRemove = function(cell) {
         var index = this.contenders.indexOf(owner);
         if (index !== -1) this.contenders.splice(index, 1);
         if (this.contenders.length == 1 && this.gamePhase === 2) this.endGame(cell.owner.gameServer);
-        else this.onPlayerDeath(cell.owner.gameServer);
     }
 };
 
@@ -214,7 +204,7 @@ Tournament.prototype.updateLB = function(gameServer, lb) {
     }
     clients = gameServer.clients.filter(function(player) {
         var client = player.playerTracker;
-        return !client.isRemoved && client.cells.length && client.socket.isConnected !== false;
+        return client.isRemoved && client.cells.length && client.socket.isConnected !== false;
     });
     clients.sort(function(a, b) {
         return b.playerTracker._score - a.playerTracker._score;
