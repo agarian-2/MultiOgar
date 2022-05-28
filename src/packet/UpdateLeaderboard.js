@@ -1,5 +1,4 @@
-'use strict';
-const BinaryWriter = require('./BinaryWriter');
+var BinaryWriter = require("./BinaryWriter");
 
 function UpdateLeaderboard(playerTracker, leaderboard, leaderboardType) {
     this.playerTracker = playerTracker;
@@ -43,7 +42,7 @@ UpdateLeaderboard.prototype.userText = function(protocol) {
     return writer.toBuffer();
 };
 
-UpdateLeaderboard.prototype.userText14 = function() {
+UpdateLeaderboard.prototype.userText14 = function () {
     var writer = new BinaryWriter();
     writer.writeUInt8(0x35);
     for (var i = 0; i < this.leaderboard.length; i++) {
@@ -62,7 +61,7 @@ UpdateLeaderboard.prototype.FFA5 = function() {
         if (item == null) return null;
         var name = item._nameUnicode,
             id = 0;
-        if (item == this.playerTracker && item.cells.length) id = item.cells[0].nodeID ^ this.playerTracker.scrambleID;
+        if (item === this.playerTracker && item.cells.length) id = item.cells[0].nodeID ^ this.playerTracker.scrambleID;
         writer.writeUInt32(id >>> 0);
         if (name) writer.writeBytes(name);
         else writer.writeUInt16(0);
@@ -77,7 +76,7 @@ UpdateLeaderboard.prototype.FFA6 = function() {
         var item = this.leaderboard[i];
         if (item == null) return null;
         var name = item._nameUtf8,
-            id = item == this.playerTracker ? 1 : 0;
+            id = item === this.playerTracker ? 1 : 0;
         writer.writeUInt32(id >>> 0);
         if (name) writer.writeBytes(name);
         else writer.writeUInt8(0);
@@ -85,16 +84,16 @@ UpdateLeaderboard.prototype.FFA6 = function() {
     return writer.toBuffer();
 };
 
-UpdateLeaderboard.prototype.FFA = function(protocol) {
+UpdateLeaderboard.prototype.FFA = function() {
     var lbCount = Math.min(this.leaderboard.length, this.playerTracker.gameServer.clients.length),
-        LeaderboardPosition = require('./LeaderboardPosition');
+        LeaderboardPosition = require("./LeaderboardPosition");
     this.playerTracker.socket.sendPacket(new LeaderboardPosition(this.leaderboard.indexOf(this.playerTracker) + 1));
     var writer = new BinaryWriter();
     writer.writeUInt8(0x35);
     for (var i = 0; i < lbCount; i++) {
         var item = this.leaderboard[i];
         if (item == null) return null;
-        if (item == this.playerTracker) {
+        if (item === this.playerTracker) {
             writer.writeUInt8(0x09);
             writer.writeUInt16(1);
         } else {
@@ -129,7 +128,7 @@ UpdateLeaderboard.prototype.buildParty = function() {
             else writer.writeUInt8(0);
         }
     }
-    var LeaderboardPosition = require('./LeaderboardPosition');
+    var LeaderboardPosition = require("./LeaderboardPosition");
     this.playerTracker.socket.sendPacket(new LeaderboardPosition(this.leaderboard.indexOf(this.playerTracker) + 1));
     return writer.toBuffer();
 };
