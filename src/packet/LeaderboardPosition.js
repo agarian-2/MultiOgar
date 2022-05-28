@@ -1,5 +1,4 @@
-'use strict';
-const BinaryWriter = require("./BinaryWriter");
+var BinaryWriter = require("./BinaryWriter");
 
 function LeaderboardPosition(place) {
     this.place = place;
