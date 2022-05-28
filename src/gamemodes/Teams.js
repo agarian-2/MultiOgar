@@ -1,5 +1,4 @@
-'use strict';
-const Mode = require("./Mode");
+var Mode = require("./Mode");
 
 function Teams() {
     Mode.apply(this, Array.prototype.slice.call(arguments));
@@ -14,6 +13,10 @@ function Teams() {
         {r: 255, g: 0, b: 0},
         {r: 0, g: 255, b: 0},
         {r: 0, g: 0, b: 255}
+        //{r: 46, g: 32, b: 0},
+        //{r: 65, g: 100, b: 32},
+        //{r: 117, g: 110, b: 110},
+        //{r: 97, g: 109, b: 101},
     ];
     this.nodes = [];
 }
@@ -69,18 +72,20 @@ Teams.prototype.onCellRemove = function(cell) {
 Teams.prototype.onCellMove = function(cell, gameServer) {
     for (var i = 0; i < cell.owner.visibleNodes.length; i++) {
         var check = cell.owner.visibleNodes[i];
-        if (check.cellType !== 0 || cell.owner == check.owner) continue;
+        if (check.cellType != 0 || cell.owner == check.owner) continue;
         var team = cell.owner.team;
-        if (check.owner.team === team) {
+        if (check.owner.team == team) {
             var m = cell.checkCellCollision(gameServer, check);
             if (m != null) !m.check.canEat(m.cell);
         }
     }
 };
 
-Teams.prototype.updateLB = function(gameServer, lb) {
+Teams.prototype.updateLB = function(gameServer) {
     gameServer.leaderboardType = this.packetLB;
-    for (var total = 0, teamMass = [], i = 0; i < this.teamCount; i++) {
+    var total = 0,
+        teamMass = [];
+    for (var i = 0; i < this.teamCount; i++) {
         teamMass[i] = 0;
         for (var j = 0; j < this.nodes[i].length; j++) {
             var cell = this.nodes[i][j];
