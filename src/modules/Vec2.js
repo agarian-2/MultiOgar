@@ -1,24 +1,40 @@
-"use strict";
-
 function Vec2(x, y) {
     this.x = x,
     this.y = y;
 }
 
 Vec2.prototype.add = function(x, y) {
-    return x instanceof Vec2 ? (this.x += x.x, this.y += x.y) : (this.x += x, this.y += y), this;
+    if (x instanceof Vec2) {
+        this.x += x.x;
+        this.y += x.y;
+    } else {
+        this.x += x;
+        this.y += y;
+    }
+    return this;
 };
 
 Vec2.prototype.add2 = function(d, m) {
-    return this.x += d.x * m, this.y += d.y * m, this;
+    this.x += d.x * m;
+    this.y += d.y * m;
+    return this;
 };
 
 Vec2.prototype.sub = function(x, y) {
-    return x instanceof Vec2 ? (this.x -= x.x, this.y -= x.y) : (this.x -= x, this.y -= y), this;
+    if (x instanceof Vec2) {
+        this.x -= x.x;
+        this.y -= x.y;
+    } else {
+        this.x -= x;
+        this.y -= y;
+    }
+    return this;
 };
 
 Vec2.prototype.sub2 = function(d, m) {
-    return this.x -= d.x * m, this.y -= d.y * m, this;
+    this.x -= d.x * m;
+    this.y -= d.y * m;
+    return this;
 };
 
 Vec2.prototype.angle = function() {
@@ -30,11 +46,11 @@ Vec2.prototype.clone = function() {
 };
 
 Vec2.prototype.dist = function() {
-    return ~~this.x * ~~this.x + ~~this.y * ~~this.y;
+    return ~~d.x * ~~d.x + ~~d.y * ~~d.y;
 };
 
 Vec2.prototype.sqDist = function() {
-    return Math.sqrt(this.x * this.x + this.y * this.y);
+    return Math.sqrt(d.x * d.x + d.y * d.y);
 };
 
 Vec2.prototype.length = function() {
@@ -46,7 +62,9 @@ Vec2.prototype.normalize = function() {
 };
 
 Vec2.prototype.scale = function(x, y) {
-    return this.x *= x, this.y *= y || x, this;
+    this.x *= x;
+    this.y *= y || x;
+    return this;
 };
 
 module.exports = Vec2;
