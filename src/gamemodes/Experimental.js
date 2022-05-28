@@ -1,6 +1,5 @@
-'use strict';
-const FFA = require('./FFA'),
-    Entity = require('../entity');
+var FFA = require("./FFA"),
+    Entity = require("../entity");
 
 function Experimental() {
     FFA.apply(this, Array.prototype.slice.call(arguments));
@@ -26,7 +25,7 @@ Experimental.prototype.spawnMotherCell = function(gameServer) {
 Experimental.prototype.onServerInit = function(gameServer) {
     gameServer.running = true;
     var self = this;
-    if (gameServer.config.virusPush != 0) Entity.Virus.prototype.onEat = function(cell) {
+    if (gameServer.config.virusPush === 1) Entity.Virus.prototype.onEat = function(cell) {
         var boost = Math.atan2(cell.boostDirection.x, cell.boostDirection.y);
         this.setBoost(gameServer.config.virusEjectSpeed - 460, boost);
     };
@@ -49,10 +48,10 @@ Experimental.prototype.onTick = function(gameServer) {
 };
 
 Experimental.prototype.onChange = function(gameServer) {
-    for (var i in this.mothercells) gameServer.removeNode(this.mothercells[i]);
+    for (;this.mothercells.length;) gameServer.removeNode(this.mothercells[0]);
     for (;gameServer.nodesAll.length;) gameServer.removeNode(gameServer.nodesAll[0]);
     for (;gameServer.nodesEject.length;) gameServer.removeNode(gameServer.nodesEject[0]);
     for (;gameServer.nodesFood.length;) gameServer.removeNode(gameServer.nodesFood[0]);
     for (;gameServer.nodesVirus.length;) gameServer.removeNode(gameServer.nodesVirus[0]);
-    Entity.Virus.prototype.feed = require('../entity/Virus').prototype.feed;
+    Entity.Virus.prototype.feed = require("../entity/Virus").prototype.feed;
 };
