@@ -1,7 +1,6 @@
-'use strict';
-const Cell = require('./Cell'),
-    Food = require('./Food'),
-    Virus = require('./Virus');
+var Cell = require("./Cell"),
+    Food = require("./Food"),
+    Virus = require("./Virus");
 
 function MotherCell() {
     Cell.apply(this, Array.prototype.slice.call(arguments));
@@ -24,8 +23,8 @@ MotherCell.prototype = new Cell();
 MotherCell.prototype.onEaten = Virus.prototype.onEaten;
 MotherCell.prototype.explode = Virus.prototype.explode;
 
-MotherCell.prototype.canEat = function(cell) {
-    return cell.cellType === 0 || cell.cellType === 2 || cell.cellType === 3;
+MotherCell.prototype.canEat = function(prey) {
+    return prey.cellType === 0 || prey.cellType === 2 || prey.cellType === 3;
 };
 
 MotherCell.prototype.onUpdate = function() {
