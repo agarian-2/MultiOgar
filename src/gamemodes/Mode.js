@@ -1,5 +1,3 @@
-'use strict';
-
 function Mode() {
     this.ID = -1;
     this.name = "Null";
@@ -15,20 +13,22 @@ Mode.prototype.onServerInit = function(gameServer) {
     gameServer.running = true;
 };
 
-Mode.prototype.onTick = function(gameServer) {};
+Mode.prototype.onTick = function() {};
 
-Mode.prototype.onPlayerInit = function(player) {};
+Mode.prototype.onPlayerInit = function() {};
 
 Mode.prototype.onPlayerSpawn = function(gameServer, player) {
     player.color = gameServer.randomColor();
     gameServer.spawnPlayer(player);
 };
 
-Mode.prototype.onCellAdd = function(cell) {};
+Mode.prototype.onPlayerDeath = function() {};
 
-Mode.prototype.onCellRemove = function(cell) {};
+Mode.prototype.onCellAdd = function() {};
 
-Mode.prototype.onCellMove = function(cell, gameServer) {};
+Mode.prototype.onCellRemove = function() {};
+
+Mode.prototype.onCellMove = function() {};
 
 Mode.prototype.updateLB = function(gameServer) {
     gameServer.leaderboardType = this.packetLB;
