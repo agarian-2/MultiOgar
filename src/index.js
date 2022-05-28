@@ -1,11 +1,10 @@
-'use strict';
-const Log = require("./modules/Logger"),
+var Log = require("./modules/Logger"),
     Commands = require("./modules/CommandList"),
     GameServer = require("./GameServer"),
     showConsole = true;
 
 function prompt() {
-    in_.question(">", function(str) {
+    in_.question(">", function (str) {
         try {
             parseCommands(str);
         } catch (error) {
@@ -18,10 +17,11 @@ function prompt() {
 
 function parseCommands(str) {
     Log.write(">" + str);
-    if (str === '') return;
-    const split = str.split(" "),
-        execute = Commands.list[split[0].toLowerCase()];
-    if (typeof execute !== 'undefined') execute(gameServer, split);
+    if (str === "") return;
+    var split = str.split(" "),
+        first = split[0].toLowerCase(),
+        execute = Commands.list[first];
+    if (typeof execute !== "undefined") execute(gameServer, split);
     else Log.warn("That is an invalid Command!");
 }
 
@@ -34,7 +34,7 @@ process.on("uncaughtException", function(error) {
     Log.fatal(error.stack);
     process.exit(1);
 });
-process.argv.forEach(function(val) {
+process.argv.forEach(function (val) {
     if (val === "--noconsole") showConsole = false;
     else if (val === "--help") {
         Log.print("Proper Usage: node index.js");
@@ -46,8 +46,8 @@ process.argv.forEach(function(val) {
 var gameServer = new GameServer();
 Log.info("\u001B[1m\u001B[32mMultiOgar-Edited " + gameServer.version + "\u001B[37m - An open source multi-protocol ogar server!\u001B[0m");
 gameServer.start();
-if (showConsole) {
-    var readline = require('readline'),
+if (showConsole === true) {
+    var readline = require("readline"),
         in_ = readline.createInterface({
             input: process.stdin,
             output: process.stdout
