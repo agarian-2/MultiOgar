@@ -1,4 +1,3 @@
-'use strict';
 function BinaryReader(buffer) {
     this._offset = 0;
     this._buffer = new Buffer(buffer);
@@ -84,7 +83,10 @@ BinaryReader.prototype.readStringZeroUtf8 = function() {
     var len = 0,
         termLen = 0;
     for (var i = this._offset; i < this._buffer.length; i++) {
-        if (this._buffer.readUInt8(i) == 0) {termLen = 1; break;}
+        if (this._buffer.readUInt8(i) == 0) {
+            termLen = 1;
+            break;
+        }
         len++;
     }
     var val = this.readStringUtf8(len);
@@ -96,7 +98,10 @@ BinaryReader.prototype.readStringZeroUnicode = function() {
     var len = 0,
         termLen = ((this._buffer.length - this._offset) & 1) != 0 ? 1 : 0;
     for (var i = this._offset; i + 1 < this._buffer.length; i += 2) {
-        if (this._buffer.readUInt16LE(i) == 0) {termLen = 2; break;}
+        if (this._buffer.readUInt16LE(i) == 0) {
+            termLen = 2;
+            break;
+        }
         len += 2;
     }
     var val = this.readStringUnicode(len);
