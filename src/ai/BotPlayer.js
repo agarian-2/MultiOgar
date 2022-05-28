@@ -1,7 +1,6 @@
-'use strict';
-const PlayerTracker = require("../PlayerTracker"),
+var PlayerTracker = require("../PlayerTracker"),
     Vector = require("../modules/Vec2");
-    
+
 function BotPlayer() {
     PlayerTracker.apply(this, Array.prototype.slice.call(arguments));
     this.splitCooldown = 0;
@@ -14,7 +13,7 @@ module.exports = BotPlayer;
 
 BotPlayer.prototype = new PlayerTracker;
 
-BotPlayer.prototype.largest = function(list) {
+BotPlayer.prototype.getLargest = function(list) {
     if (!list.length) return null;
     var sorted = list.valueOf();
     sorted.sort(function(list, sorted) {
@@ -24,7 +23,7 @@ BotPlayer.prototype.largest = function(list) {
 };
 
 BotPlayer.prototype.checkConnection = function() {
-    if (this.socket.isCloseReq === true) {
+    if (this.socket.isCloseReq) {
         for (;this.cells.length;) this.gameServer.removeNode(this.cells[0]);
         return this.isRemoved = true;
     }
@@ -36,7 +35,7 @@ BotPlayer.prototype.checkConnection = function() {
 
 BotPlayer.prototype.sendUpdate = function() {
     if (this.splitCooldown) this.splitCooldown--;
-    this.decide(this.largest(this.cells));
+    this.decide(this.getLargest(this.cells));
 };
 
 BotPlayer.prototype.decide = function(cell) {
@@ -45,14 +44,14 @@ BotPlayer.prototype.decide = function(cell) {
         prey = null;
     if (this.splitTarget) {
         // De-compress later
-        if (this.splitTarget.isRemoved === true && (this.splitTarget = null, this.targetPursuit = 0),
+        if (this.splitTarget.isRemoved && (this.splitTarget = null, this.targetPursuit = 0),
             !(this.targetPursuit <= 0)) return this.targetPursuit--, void(this.mouse = {
             x: this.splitTarget.position.x,
             y: this.splitTarget.position.y
         });
         this.splitTarget = null;
     }
-    var merge = this.gameServer.config.playerMergeTime <= 0 || this.recMode === true,
+    var merge = this.gameServer.config.playerMergeTime <= 0 || this.recMode,
         splitCooldown = 1.5 * this.cells.length < 9 && !this.splitCooldown,
         size = cell._size / 1.3;
     for (var i = 0; i < this.viewNodes.length; i++) {
@@ -60,7 +59,7 @@ BotPlayer.prototype.decide = function(cell) {
         if (check.owner !== this) {
             var influence = 0;
             if (check.cellType === 0) {
-                if (this.gameServer.gameMode.isTeams === true && cell.owner.team == check.owner.team) continue;
+                if (this.gameServer.gameMode.isTeams && cell.owner.team == check.owner.team) continue;
                 if (cell._size > check._size * 1.3) influence = check._size / Math.log(this.viewNodes.length);
                 else if (check._size > cell._size * 1.3) influence = -Math.log(check._size / cell._size);
                 else influence = -check._size / cell._size;
@@ -69,7 +68,7 @@ BotPlayer.prototype.decide = function(cell) {
                 if (cell._size > check._size * 1.3) {
                     if (this.cells.length >= this.gameServer.config.playerMaxCells) influence = 2;
                     else influence = -1;
-                } else if (check.isMotherCell === true && check._size > cell._size * 1.3) influence = -1;
+                } else if (check.isMotherCell && check._size > cell._size * 1.3) influence = -1;
             }
             else if (check.cellType === 3 && cell._size > check._size * 1.3) influence = 2;
             if (influence != 0) {
@@ -80,7 +79,7 @@ BotPlayer.prototype.decide = function(cell) {
                 influence /= dist;
                 var scale = displacement.normalize().scale(influence);
                 // De-compress later
-                splitCooldown && check.cellType === 0 && size > 1.3 * check._size && cell._size * (merge ? .1 : .4) < check._size && this.canSplitKill(cell, check, dist) && (prey ? check._size > prey._size && (prey = check) : prey = check), result.add(scale);
+                splitCooldown && 0 === check.cellType && size > 1.3 * check._size && cell._size * (merge ? .1 : .4) < check._size && this.splitKill(cell, check, dist) && (prey ? check._size > prey._size && (prey = check) : prey = check), result.add(scale);
             }
         }
     }
@@ -111,7 +110,7 @@ BotPlayer.prototype.decide = function(cell) {
     }
 };
 
-BotPlayer.prototype.canSplitKill = function(cell, prey, dist) {
+BotPlayer.prototype.splitKill = function(cell, prey, dist) {
     if (prey.cellType === 2) return 1.3 * this.gameServer.config.virusShotSpeed - cell._size / 2 - prey._size >= dist;
     var speed = Math.max(1.3 * this.gameServer.config.playerSplitSpeed, cell._size / 1.4142 * 4.5);
     return speed >= dist;
