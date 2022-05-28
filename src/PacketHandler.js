@@ -1,5 +1,4 @@
-'use strict';
-const Packet = require("./packet"),
+var Packet = require("./packet"),
     BinaryReader = require("./packet/BinaryReader"),
     Entity = require("./entity");
 
@@ -21,12 +20,12 @@ function PacketHandler(gameServer, socket) {
     this.handler = {
         254: this.onProtocol.bind(this)
     };
-    this.minion = this.socket.playerTracker.minion;
+    this.socket.playerTracker.minion = this.socket.playerTracker.minion;
 }
 
 module.exports = PacketHandler;
 
-PacketHandler.prototype.handleMSG = function(message) {
+PacketHandler.prototype.handleMessage = function(message) {
     if (this.handler.hasOwnProperty(message[0])) {
         this.handler[message[0]](message);
         this.socket.lastAliveTime = this.gameServer.stepDateTime;
@@ -85,10 +84,10 @@ PacketHandler.prototype.onCompleted = function(protocol) {
     this.protocol = protocol;
     this.socket.sendPacket(new Packet.ClearAll());
     this.socket.sendPacket(new Packet.SetBorder(this.socket.playerTracker, gameServer.border, gameServer.config.serverGamemode, "MultiOgar-Edited " + gameServer.version));
-    gameServer.sendChatMSG(null, this.socket.playerTracker, "MultiOgar " + gameServer.version);
-    if (gameServer.config.serverWelcome1) gameServer.sendChatMSG(null, this.socket.playerTracker, gameServer.config.serverWelcome1);
-    if (gameServer.config.serverWelcome2) gameServer.sendChatMSG(null, this.socket.playerTracker, gameServer.config.serverWelcome2);
-    if (!gameServer.config.serverChat) gameServer.sendChatMSG(null, this.socket.playerTracker, "The chat is disabled.");
+    gameServer.sendChatMessage(null, this.socket.playerTracker, "MultiOgar " + gameServer.version);
+    if (gameServer.config.serverWelcome1) gameServer.sendChatMessage(null, this.socket.playerTracker, gameServer.config.serverWelcome1);
+    if (gameServer.config.serverWelcome2) gameServer.sendChatMessage(null, this.socket.playerTracker, gameServer.config.serverWelcome2);
+    if (!gameServer.config.serverChat) gameServer.sendChatMessage(null, this.socket.playerTracker, "The chat is disabled.");
 };
 
 PacketHandler.prototype.onJoin = function(message) {
@@ -114,9 +113,9 @@ PacketHandler.prototype.onKeySpace = function(message) {
 PacketHandler.prototype.onKeyQ = function(message) {
     if (message.length !== 1) return;
     var client = this.socket.playerTracker;
-    if (client.cells.length) {
+    if (client.cells.length && this.socket.playerTracker.minions.length) {
         client.minion.follow = !client.minion.follow;
-        this.gameServer.sendChatMSG(null, client, "Minions Follow Centerpoint: " + client.minion.frozen + ".");
+        this.gameServer.sendChatMessage(null, client, "Minions follow centerpoint: " + client.minion.frozen + ".");
     }
     this.pressQ = true;
 };
@@ -126,51 +125,53 @@ PacketHandler.prototype.onKeyW = function(message) {
 };
 
 PacketHandler.prototype.onKeyE = function() {
-    this.minion.split = true;
+    this.socket.playerTracker.minion.split = true;
 };
 
 PacketHandler.prototype.onKeyR = function() {
-    this.minion.eject = true;
+    this.socket.playerTracker.minion.eject = true;
 };
 
 PacketHandler.prototype.onKeyT = function() {
-    this.minion.frozen = !this.minion.frozen;
-    this.gameServer.sendChatMSG(null, this.socket.playerTracker, "Minions Frozen: " + this.minion.frozen + ".");
+    if (!this.socket.playerTracker.minions.length) return;
+    this.socket.playerTracker.minion.frozen = !this.socket.playerTracker.minion.frozen;
+    this.gameServer.sendChatMessage(null, this.socket.playerTracker, "Minions frozen: " + this.socket.playerTracker.minion.frozen + ".");
 };
 
 PacketHandler.prototype.onKeyP = function() {
-    this.minion.collect = !this.minion.collect;
-    this.gameServer.sendChatMSG(null, this.socket.playerTracker, "Minion Food Collection: " + this.minion.collect + ".");
+    if (!this.socket.playerTracker.minions.length) return;
+    this.socket.playerTracker.minion.collect = !this.socket.playerTracker.minion.collect;
+    this.gameServer.sendChatMessage(null, this.socket.playerTracker, "Minion food collection: " + this.socket.playerTracker.minion.collect + ".");
 };
 
 PacketHandler.prototype.onKeyO = function() {
     var client = this.socket.playerTracker;
     if (client.OP.enabled && client.cells.length) {
         client.frozen = !client.frozen;
-        this.gameServer.sendChatMSG(null, client, "Frozen: " + client.frozen + ".");
+        this.gameServer.sendChatMessage(null, client, "Frozen: " + client.frozen + ".");
     }
 };
 
 PacketHandler.prototype.onKeyM = function() {
     var client = this.socket.playerTracker;
     if (!client.OP.enabled) return;
-    if (!client.cells.length) client.mergeOverride = false;
+    if (client.cells.length <= 1) client.mergeOverride = false;
     else client.mergeOverride = !client.mergeOverride;
-    this.gameServer.sendChatMSG(null, client, "Force-Merging: " + client.mergeOverride + ".");
+    this.gameServer.sendChatMessage(null, client, "Force merging: " + client.mergeOverride + ".");
 };
 
 PacketHandler.prototype.onKeyI = function() {
     var client = this.socket.playerTracker;
     if (client.OP.enabled && client.cells.length) {
         client.recMode = !client.recMode;
-        this.gameServer.sendChatMSG(null, client, "Rec-Mode: " + client.recMode + ".");
+        this.gameServer.sendChatMessage(null, client, "Supersplitter: " + client.recMode + ".");
     }
 };
 
 PacketHandler.prototype.onKeyK = function() {
     var client = this.socket.playerTracker;
     if (!client.OP.enabled || !client.cells.length) return;
-    this.gameServer.sendChatMSG(null, client, "You killed yourself.");
+    this.gameServer.sendChatMessage(null, client, "You killed yourself.");
     for (;client.cells.length;) {
         var cells = client.cells[0];
         this.gameServer.removeNode(cells);
@@ -199,7 +200,7 @@ PacketHandler.prototype.onKeyL = function() {
     for (;gameServer.nodesEject.length;) gameServer.removeNode(gameServer.nodesEject[0]);
     if (gameServer.gameMode.ID === 2)
         for (;gameServer.gameMode.mothercells.length;) gameServer.removeNode(gameServer.gameMode.mothercells[0]);
-    this.gameServer.sendChatMSG(null, client, "Cleared all non-player nodes.");
+    this.gameServer.sendChatMessage(null, client, "Cleared all non-player nodes.");
 };
 
 PacketHandler.prototype.onKeyH = function() {
@@ -227,7 +228,7 @@ PacketHandler.prototype.onKeyH = function() {
         }
         cell.setSize(minSize);
     }
-    this.gameServer.sendChatMSG(null, client, "You exploded yourself.");
+    this.gameServer.sendChatMessage(null, client, "You exploded yourself.");
 };
 
 PacketHandler.prototype.onKeyZ = function() {
@@ -237,7 +238,7 @@ PacketHandler.prototype.onKeyZ = function() {
     client.cells.forEach(function(cell) {
         cell.color = client.color;
     });
-    this.gameServer.sendChatMSG(null, client, "Changed your color to (" + client.color.r + ", " + client.color.g + ", " + client.color.b + ").");
+    this.gameServer.sendChatMessage(null, client, "Changed your color to (" + client.color.r + ", " + client.color.g + ", " + client.color.b + ").");
 };
 
 PacketHandler.prototype.onKeyS = function() {
@@ -245,7 +246,7 @@ PacketHandler.prototype.onKeyS = function() {
     if (!client.OP.enabled) return;
     var virus = new Entity.Virus(this.gameServer, null, client.mouse, this.gameServer.config.virusMinSize);
     this.gameServer.addNode(virus);
-    this.gameServer.sendChatMSG(null, client, "Spawned a virus at (" + client.mouse.x + ", " + client.mouse.y + ").");
+    this.gameServer.sendChatMessage(null, client, "Spawned a virus at (" + client.mouse.x + ", " + client.mouse.y + ").");
 };
 
 PacketHandler.prototype.onKeyJ = function() {
@@ -261,7 +262,7 @@ PacketHandler.prototype.onKeyC = function() {
     if (!client.OP.enabled) return;
     client.OP.foodSize += 10;
     if (client.OP.foodSize >= this.gameServer.config.foodBrushLimit + 1) client.OP.foodSize = 10;
-    this.gameServer.sendChatMSG(null, client, "Food Size: " + client.OP.foodSize + ".");
+    this.gameServer.sendChatMessage(null, client, "Food size: " + client.OP.foodSize + ".");
 };
 
 PacketHandler.prototype.onKeyB = function() {
@@ -283,7 +284,7 @@ PacketHandler.prototype.onKeyB = function() {
         ],
         index = Math.floor(Math.random() * colors.length),
         RGB = colors[index];
-    this.gameServer.sendChatMSG(null, client, "Food Color: (" + RGB.r + ", " + RGB.g + ", " + RGB.b + ").");
+    this.gameServer.sendChatMessage(null, client, "Food color: (" + RGB.r + ", " + RGB.g + ", " + RGB.b + ").");
     return client.OP.foodColor = {
         r: RGB.r,
         g: RGB.g,
@@ -299,7 +300,7 @@ PacketHandler.prototype.onKeyG = function() {
         cell.position.y = client.mouse.y;
         this.gameServer.updateNodeQuad(cell);
     }
-    this.gameServer.sendChatMSG(null, client, "Teleported to (" + cell.position.x + ", " + cell.position.y + ").");
+    this.gameServer.sendChatMessage(null, client, "Teleported to (" + cell.position.x + ", " + cell.position.y + ").");
 };
 
 PacketHandler.prototype.onKeyN = function() {
@@ -342,34 +343,34 @@ PacketHandler.prototype.onKeyV = function() {
 
 PacketHandler.prototype.rainbowLoop = function() {
     var colors = [
-        {'r':255, 'g':  0, 'b': 0}, // Red
-        {'r':255, 'g': 32, 'b': 0},
-        {'r':255, 'g': 64, 'b': 0},
-        {'r':255, 'g': 96, 'b': 0},
-        {'r':255, 'g':128, 'b': 0}, // Orange
-        {'r':255, 'g':160, 'b': 0},
-        {'r':255, 'g':192, 'b': 0},
-        {'r':255, 'g':224, 'b': 0},
-        {'r':255, 'g':255, 'b': 0}, // Yellow
-        {'r':192, 'g':255, 'b': 0},
-        {'r':128, 'g':255, 'b': 0},
-        {'r': 64, 'g':255, 'b': 0},
-        {'r': 0, 'g':255, 'b': 0}, // Green
-        {'r': 0, 'g':192, 'b': 64},
-        {'r': 0, 'g':128, 'b':128},
-        {'r': 0, 'g': 64, 'b':192},
-        {'r': 0, 'g': 0, 'b':255}, // Blue
-        {'r': 18, 'g': 0, 'b':192},
-        {'r': 37, 'g': 0, 'b':128},
-        {'r': 56, 'g': 0, 'b': 64},
-        {'r': 75, 'g': 0, 'b':130}, // Indigo
-        {'r': 92, 'g': 0, 'b':161},
-        {'r':109, 'g': 0, 'b':192},
-        {'r':126, 'g': 0, 'b':223},
-        {'r':143, 'g': 0, 'b':255}, // Purple
-        {'r':171, 'g': 0, 'b':192},
-        {'r':199, 'g': 0, 'b':128},
-        {'r':227, 'g': 0, 'b': 64}
+        {"r":255, "g":  0, "b": 0}, // Red
+        {"r":255, "g": 32, "b": 0},
+        {"r":255, "g": 64, "b": 0},
+        {"r":255, "g": 96, "b": 0},
+        {"r":255, "g":128, "b": 0}, // Orange
+        {"r":255, "g":160, "b": 0},
+        {"r":255, "g":192, "b": 0},
+        {"r":255, "g":224, "b": 0},
+        {"r":255, "g":255, "b": 0}, // Yellow
+        {"r":192, "g":255, "b": 0},
+        {"r":128, "g":255, "b": 0},
+        {"r": 64, "g":255, "b": 0},
+        {"r": 0, "g":255, "b": 0}, // Green
+        {"r": 0, "g":192, "b": 64},
+        {"r": 0, "g":128, "b":128},
+        {"r": 0, "g": 64, "b":192},
+        {"r": 0, "g": 0, "b":255}, // Blue
+        {"r": 18, "g": 0, "b":192},
+        {"r": 37, "g": 0, "b":128},
+        {"r": 56, "g": 0, "b": 64},
+        {"r": 75, "g": 0, "b":130}, // Indigo
+        {"r": 92, "g": 0, "b":161},
+        {"r":109, "g": 0, "b":192},
+        {"r":126, "g": 0, "b":223},
+        {"r":143, "g": 0, "b":255}, // Purple
+        {"r":171, "g": 0, "b":192},
+        {"r":199, "g": 0, "b":128},
+        {"r":227, "g": 0, "b": 64}
     ];
     if (this.tickRainbow > 27) this.tickRainbow = 0;
     var client = this.socket.playerTracker;
@@ -385,7 +386,7 @@ PacketHandler.prototype.onKeyX = function() {
     client.rainbowEnabled = !client.rainbowEnabled;
     if (client.rainbowEnabled) this.intervalID = setInterval(this.rainbowLoop, 40);
     else clearInterval(this.intervalID);
-    this.gameServer.sendChatMSG(null, client, "Rainbow: " + client.rainbowEnabled + ".");
+    this.gameServer.sendChatMessage(null, client, "Rainbow: " + client.rainbowEnabled + ".");
 };
 
 PacketHandler.prototype.onChat = function(message) {
@@ -455,8 +456,8 @@ PacketHandler.prototype.randomSkin = function() {
     var randomSkins = [],
         fs = require("fs"),
         skin = null;
-    if (fs.existsSync("../src/randomskins.txt")) randomSkins = fs.readFileSync("../src/randomskins.txt", "utf8").split(/[\r\n]+/).filter(function(x) {
-        return x !== '';
+    if (fs.existsSync("../src/ai/Skins.txt")) randomSkins = fs.readFileSync("../src/ai/Skins.txt", "utf8").split(/[\r\n]+/).filter(function(x) {
+        return x !== "";
     });
     if (randomSkins.length > 0) {
         var index = (randomSkins.length * Math.random()) >>> 0;
@@ -472,9 +473,9 @@ PacketHandler.prototype.nickName = function(text) {
         var skinName = null,
             userName = text,
             n = -1;
-        if (text[0] == '<' && (n = text.indexOf('>', 1)) >= 1) {
+        if (text[0] === "{" && (n = text.indexOf("}", 1)) >= 1) {
             var inner = text.slice(1, n);
-            if (n > 1) skinName = inner == "r" ? this.randomSkin() : inner;
+            if (n > 1) skinName = inner === "r" ? this.randomSkin() : inner;
             else skinName = "";
             userName = text.slice(n + 1);
         }
