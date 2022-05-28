@@ -10,7 +10,7 @@
         "curl": "^0.1.4",
         "eris": "^0.11.2",
         "figlet": "latest",
-        "ws": "1.1.0"
+        "ws": "1.1.5"
     },
     "devDependencies": {},
     "scripts": {
