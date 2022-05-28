@@ -1,4 +1,3 @@
-'use strict';
 function ServerStat(playerTracker, gameServer) {
     this.playerTracker = playerTracker;
     this.gameServer = gameServer;
@@ -6,7 +5,7 @@ function ServerStat(playerTracker, gameServer) {
 
 module.exports = ServerStat;
 
-ServerStat.prototype.build = function(protocol) {
+ServerStat.prototype.build = function() {
     var gameServer = this.gameServer,
         total = 0,
         alive = 0,
@@ -25,16 +24,16 @@ ServerStat.prototype.build = function(protocol) {
         }
     }
     var obj = {
-            'name': gameServer.config.serverName,
-            'mode': gameServer.gameMode.name,
-            'uptime': process.uptime() >>> 0,
-            'update': gameServer.updateTimeAvg.toFixed(3),
-            'playersTotal': total,
-            'playersAlive': alive,
-            'playersDead': dead,
-            'playersSpect': spectate,
-            'botsTotal': bots,
-            'playersLimit': gameServer.config.serverMaxConnect
+            "name": gameServer.config.serverName,
+            "mode": gameServer.gameMode.name,
+            "uptime": process.uptime() >>> 0,
+            "update": gameServer.updateTimeAvg.toFixed(3),
+            "playersTotal": total,
+            "playersAlive": alive,
+            "playersDead": dead,
+            "playersSpect": spectate,
+            "botsTotal": bots,
+            "playersLimit": gameServer.config.serverMaxConnect
         },
         json = JSON.stringify(obj),
         BinaryWriter = require("./BinaryWriter"),
