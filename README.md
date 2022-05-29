@@ -4,31 +4,23 @@ Agar.io Private Servers:
 
 [![Discord](https://discordapp.com/api/guilds/407210435721560065/embed.png?style=banner2)](https://discord.gg/27v68Sb)
 
-My Discord server:
-
-[![Discord](https://discordapp.com/api/guilds/442747837403627530/embed.png?style=banner2)](https://discord.gg/JrwVT3F)
-
-An invite to my Discord server (IDK how to add the fancy embed lol): https://discord.gg/JrwVT3F
-
-*Please note that my Discord invite doesn't lead to an agar.io-related server, it's just my Discord server.*
-
 A fast, open source [Agar.io](http://agar.io/) server that supports multiple protocol versions and smooth vanilla physics.
 
-Since August of 2016, [Barbosik](https://github.com/Barbosik) has stopped working on this project. So Megabyte918 forked the code and remade it into MultiOgar-Edited, an updated version of the previous MultiOgar. Then it got sort-of abandoned, so I decided to upload my heavily modified MultiOgar-Edited server.
+Since August of 2016, [Barbosik](https://github.com/Barbosik) has stopped working on this project. So Megabyte918 forked the code and remade it into MultiOgar-Edited, an updated version of the previous MultiOgar. Then it also became abandoned, so I decided to upload my own heavily modified MultiOgar-Edited server.
 
 >---
 
 # Information
-Current version : **1.5.2**
+Current version : **1.7.7**
 
 ![Language](https://img.shields.io/badge/language-node.js-yellow.svg)
 [![License](https://img.shields.io/badge/license-APACHE2-blue.svg)](https://github.com/Barbosik/OgarMulti/blob/master/LICENSE.md)
 
 Original MultiOgar code is based on the private server implementation [Ogar](https://github.com/OgarProject/Ogar). The original code rightfully belongs to the [OgarProject](https://github.com/OgarProject).
 
-MultiOgar-Edited code however, is based on MultiOgar code that has been heavily modified and improved by many collaborators. The overall goal of this fork is to make physics as vanilla as possible, cleanup most of the code, and add lots of new features while maintaining better performance than the original MultiOgar.
+MultiOgar-Edited code however, is based on MultiOgar code that has been heavily modified and improved by many collaborators. The overall goal of this fork is to make physics as vanilla as possible, cleanup most of the code, and add lots of new features while maintaining the same or better performance than the original MultiOgar.
 
-While I have no specific client this server is bound to, I highly suggest using my client. It is hosted at https://agarian-2.github.io/ and its Github repository is here: https://github.com/agarian-2/agarian-2.github.io. To connect to a custom server, press CTRL+SHIFT+J and type in the following: `setServer("serverip:serverport")`. The client uses `wss://` be default because of the github.io link. If your server does not support `wss://`, you will need to download the client and go into `main_out.js` to change it to `ws://`.
+While I have no specific client this server is bound to, I highly suggest using my client. It is hosted at https://agarian-2.github.io/ and its Github repository is here: https://github.com/agarian-2/agarian-2.github.io. To connect to a custom server, press CTRL+SHIFT+J and type in the following: `setServer("serverip:serverport")`. The client uses `wss://` be default because of the github.io link. If your server does not support `wss://`, you will need to download the client.
 
 >---
 
