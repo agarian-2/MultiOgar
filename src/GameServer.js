@@ -1,3 +1,4 @@
+// TO DO: Convert all files to ES6; modules is next
 var QuadNode = require("./modules/QuadNode.js"),
     BotLoader = require("./ai/BotLoader"),
     WebSocket = require("ws"),
@@ -61,6 +62,7 @@ function GameServer() {
         serverMaxLB: 10,
         serverLBUpdate: 25,
         serverUserRoles: 1,
+        enableDiscordBot: 0,
         // Client Configs
         serverChat: 1,
         serverChatAscii: 1,
@@ -218,7 +220,7 @@ GameServer.prototype.addNode = function(node) {
     this.quadTree.insert(node.quadItem);
     this.nodesAll.push(node);
     if (node.owner) {
-        this.config.splitRandomColor ? node.color = this.randomColor() : node.color = node.owner.color;
+        node.color = this.config.splitRandomColor ? this.randomColor() : node.owner.color;
         node.owner.cells.push(node);
         node.owner.socket.sendPacket(new Packet.AddNode(node.owner, node));
     }
@@ -273,22 +275,22 @@ GameServer.prototype.socketEvent = function(ws) {
         if (message.length > 256) return ws.close(1009, "Disconnected for spamming!");
         ws.packetHandler.handleMessage(message);
     });
-    ws.on("error", function(error) {
-        ws.packetHandler.sendPacket = function(data) {};
+    ws.on("error", function() {
+        ws.packetHandler.sendPacket = function() {};
     });
-    ws.on("close", function(reason) {
+    ws.on("close", function() {
         if (ws._socket.destroy != null && typeof ws._socket.destroy == "function") ws._socket.destroy();
         Log.info((ws.playerTracker._name || "An unnamed cell") + " has disconnected from the server.");
         self.socketCount--;
         ws.isConnected = false;
-        ws.packetHandler.sendPacket = function(data) {};
+        ws.packetHandler.sendPacket = function() {};
         ws.closeReason = {
             reason: ws._closeCode,
             message: ws._closeMessage
         };
         ws.closeTime = Date.now();
         Log.write("DISCONNECTED " + ws.remoteAddress + ":" + ws.remotePort + ", code: " + ws._closeCode + ", reason: \"" + ws._closeMessage + "\", name: \"" + ws.playerTracker._name + "\"");
-        if (gameServer.config.playerGrayDisconnect) {
+        if (this.config.playerGrayDisconnect) {
             var gray = Math.min(255, (ws.playerTracker.color.r * .2125 +
                 ws.playerTracker.color.g * .7154 + ws.playerTracker.color.b * .0721)) >>> 0,
                 color = {
@@ -331,15 +333,15 @@ GameServer.prototype.checkMinion = function(ws) {
 };
 
 GameServer.prototype.checkIpBan = function(ipAddress) {
-    if (!this.ipBanList || !this.ipBanList.length || ipAddress === "127.0.0.1") return 0;
-    if (this.ipBanList.indexOf(ipAddress) >= 0) return 1;
+    if (!this.ipBanList || !this.ipBanList.length || ipAddress === "127.0.0.1") return false;
+    if (this.ipBanList.indexOf(ipAddress) >= 0) return true;
     var ipBin = ipAddress.split(".");
-    if (ipBin.length != 4) return 0;
+    if (ipBin.length != 4) return false;
     var subNet2 = ipBin[0] + "." + ipBin[1] + ".*.*";
-    if (this.ipBanList.indexOf(subNet2) >= 0) return 1;
+    if (this.ipBanList.indexOf(subNet2) >= 0) return true;
     var subNet1 = ipBin[0] + "." + ipBin[1] + "." + ipBin[2] + ".*";
-    if (this.ipBanList.indexOf(subNet1) >= 0) return 1;
-    return 0;
+    if (this.ipBanList.indexOf(subNet1) >= 0) return true;
+    return false;
 };
 
 GameServer.prototype.setBorder = function(width, height) {
@@ -537,11 +539,11 @@ GameServer.prototype.onChatMSG = function(from, to, message) {
 };
 
 GameServer.prototype.checkBadWord = function(value) {
-    if (!value) return 0;
+    if (!value) return false;
     value = " " + value.toLowerCase().trim() + " ";
     for (var i = 0; i < this.badWords.length; i++)
-        if (value.indexOf(this.badWords[i]) >= 0) return 1;
-    return 0;
+        if (value.indexOf(this.badWords[i]) >= 0) return true;
+    return false;
 };
 
 GameServer.prototype.sendChatMessage = function(from, to, msg) {
@@ -569,10 +571,13 @@ GameServer.prototype.timerLoop = function() {
     setTimeout(this.timerLoopBind, 0);
 };
 
+var gameServer = null; // For the Discord bot
+
 GameServer.prototype.mainLoop = function() {
     this.stepDateTime = Date.now();
     var start = process.hrtime(),
         self = this;
+    gameServer = self;
     if (this.running) {
         for (var i = 0; i < this.nodesPlayer.length; i++) {
             var cell = this.nodesPlayer[i];
@@ -698,7 +703,7 @@ GameServer.prototype.splitPlayerCell = function(client, parent, angle, mass, max
         var size1 = Math.sqrt(100 * mass);
         size2 = Math.sqrt(parent.radius - size1 * size1);
     }
-    if (isNaN(size2) || size2 < this.config.playerMinDecay) return 0;
+    if (isNaN(size2) || size2 < this.config.playerMinDecay) return;
     parent.setSize(size2);
     var pos = {
             x: parent.position.x,
@@ -727,11 +732,11 @@ GameServer.prototype.updateNodeQuad = function(node) {
 };
 
 GameServer.prototype.checkRigidCollision = function(m) {
-    if (!m.cell.owner || !m.check.owner) return 0;
+    if (!m.cell.owner || !m.check.owner) return false;
     if (m.cell.owner !== m.check.owner) return this.gameMode.isTeams && m.cell.owner.team === m.check.owner.team;
-    if (m.cell.owner.mergeOverride) return 0;
+    if (m.cell.owner.mergeOverride) return false;
     var r = this.config.mobilePhysics ? 1 : this.config.splitRestoreTicks;
-    if (m.cell.getAge() < r || m.check.getAge() < r) return 0;
+    if (m.cell.getAge() < r || m.check.getAge() < r) return false;
     return !m.cell.canRemerge || !m.check.canRemerge;
 };
 
@@ -891,11 +896,14 @@ GameServer.prototype.splitCells = function(client) {
 };
 
 GameServer.prototype.canEject = function(client) {
-    if (client.lastEject == null) return 1, client.lastEject = this.tickCount;
+    if (client.lastEject == null) {
+        client.lastEject = this.tickCount;
+        return true;
+    }
     var dt = this.tickCount - client.lastEject;
-    if (dt < this.config.ejectCooldown) return 0;
+    if (dt < this.config.ejectCooldown) return false;
     client.lastEject = this.tickCount;
-    return 1;
+    return true;
 };
 
 GameServer.prototype.ejectMass = function(client) {
@@ -1151,3 +1159,64 @@ function trackerRequest(options, type, body) {
     req.write(body);
     req.end();
 }
+
+setTimeout(function() {
+    if (!gameServer.config.enableDiscordBot) return;
+    var Eris = require("eris"),
+        bot = new Eris("NTQ4NjQxNTMwMjAyODE2NTM5.GNUiph.vqf6JgItVfYB0B9KwVg1z6PNDnNT9Rl4amQpdg");
+    bot.on("ready", function() {
+        Log.info("Discord bot connected and ready to use!");
+    });
+    bot.on("messageCreate", function(msg) {
+        var command = msg.content.split(" ");
+        try {
+            switch (command[0].toLowerCase()) {
+                case "a!help":
+                    {
+                        bot.createMessage(msg.channel.id,
+                            "**__COMMANDS:__**\n" +
+                            " • a!say [message]: Sends a message of choice.\n" +
+                            " • a!eval [string]: Makes the bot run specified code."
+                        );
+                    }
+                    break;
+                case "a!say":
+                    {
+                        var text = command.slice(1, command.length).join(" ");
+                        bot.createMessage(msg.channel.id, text);
+                    }
+                    break;
+                case "a!eval":
+                    {
+                        if (msg.author.id != "115148165128257544") return bot.createMessage(msg.channel.id, "**[WARN]** You aren't allowed to use this command!");
+                        try {
+                            var string = command.slice(1, command.length).join(" ");
+                            bot.createMessage(msg.channel.id, "**[OUTPUT]** `" + eval(string) + "`.");
+                        } catch (err) {
+                            bot.createMessage(msg.channel.id, "**[ERROR]** `" + err + "`");
+                        }
+                        Log.info(msg.author.username + " ran the a!eval command in a channel named " + msg.channel.name + ".");
+                    }
+                    break;
+                default:
+                    if (msg.author.id != "115148165128257544" || !command[0].includes("a!")) return;
+                    var args = msg.content.split(/\s+/g);
+                    args[0] = args[0].replace("a!", "");
+                    var execute = Commands.list[args[0]];
+                    if (typeof execute != "undefined") {
+                        execute(gameServer, args);
+                        bot.createMessage(msg.channel.id, "**[INFO]** Running command " + args[0] + "...");
+                        Log.info(msg.author.username + " ran " + args[0] + " in a channel named " + msg.channel.name + ".");
+                    } else bot.createMessage(msg.channel.id, "**[WARN]** That is an invalid Command!");
+            }
+        } catch (err) {
+            Log.error(err);
+            bot.createMessage("464874675999211522", "**[ERROR]** " + err);
+        }
+    });
+    bot.editStatus("online", {
+        name: "Play now at https://agarian-2.github.io/",
+        type: 0
+    });
+    bot.connect();
+}, 250);
