@@ -62,7 +62,6 @@ function GameServer() {
         serverMaxLB: 10,
         serverLBUpdate: 25,
         serverUserRoles: 1,
-        enableDiscordBot: 0,
         // Client Configs
         serverChat: 1,
         serverChatAscii: 1,
@@ -571,13 +570,10 @@ GameServer.prototype.timerLoop = function() {
     setTimeout(this.timerLoopBind, 0);
 };
 
-var gameServer = null; // For the Discord bot
-
 GameServer.prototype.mainLoop = function() {
     this.stepDateTime = Date.now();
     var start = process.hrtime(),
         self = this;
-    gameServer = self;
     if (this.running) {
         for (var i = 0; i < this.nodesPlayer.length; i++) {
             var cell = this.nodesPlayer[i];
@@ -1159,64 +1155,3 @@ function trackerRequest(options, type, body) {
     req.write(body);
     req.end();
 }
-
-setTimeout(function() {
-    if (!gameServer.config.enableDiscordBot) return;
-    var Eris = require("eris"),
-        bot = new Eris("NTQ4NjQxNTMwMjAyODE2NTM5.GNUiph.vqf6JgItVfYB0B9KwVg1z6PNDnNT9Rl4amQpdg");
-    bot.on("ready", function() {
-        Log.info("Discord bot connected and ready to use!");
-    });
-    bot.on("messageCreate", function(msg) {
-        var command = msg.content.split(" ");
-        try {
-            switch (command[0].toLowerCase()) {
-                case "a!help":
-                    {
-                        bot.createMessage(msg.channel.id,
-                            "**__COMMANDS:__**\n" +
-                            " • a!say [message]: Sends a message of choice.\n" +
-                            " • a!eval [string]: Makes the bot run specified code."
-                        );
-                    }
-                    break;
-                case "a!say":
-                    {
-                        var text = command.slice(1, command.length).join(" ");
-                        bot.createMessage(msg.channel.id, text);
-                    }
-                    break;
-                case "a!eval":
-                    {
-                        if (msg.author.id != "115148165128257544") return bot.createMessage(msg.channel.id, "**[WARN]** You aren't allowed to use this command!");
-                        try {
-                            var string = command.slice(1, command.length).join(" ");
-                            bot.createMessage(msg.channel.id, "**[OUTPUT]** `" + eval(string) + "`.");
-                        } catch (err) {
-                            bot.createMessage(msg.channel.id, "**[ERROR]** `" + err + "`");
-                        }
-                        Log.info(msg.author.username + " ran the a!eval command in a channel named " + msg.channel.name + ".");
-                    }
-                    break;
-                default:
-                    if (msg.author.id != "115148165128257544" || !command[0].includes("a!")) return;
-                    var args = msg.content.split(/\s+/g);
-                    args[0] = args[0].replace("a!", "");
-                    var execute = Commands.list[args[0]];
-                    if (typeof execute != "undefined") {
-                        execute(gameServer, args);
-                        bot.createMessage(msg.channel.id, "**[INFO]** Running command " + args[0] + "...");
-                        Log.info(msg.author.username + " ran " + args[0] + " in a channel named " + msg.channel.name + ".");
-                    } else bot.createMessage(msg.channel.id, "**[WARN]** That is an invalid Command!");
-            }
-        } catch (err) {
-            Log.error(err);
-            bot.createMessage("464874675999211522", "**[ERROR]** " + err);
-        }
-    });
-    bot.editStatus("online", {
-        name: "Play now at https://agarian-2.github.io/",
-        type: 0
-    });
-    bot.connect();
-}, 250);
