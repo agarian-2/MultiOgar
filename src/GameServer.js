@@ -289,7 +289,7 @@ GameServer.prototype.socketEvent = function(ws) {
         };
         ws.closeTime = Date.now();
         Log.write("DISCONNECTED " + ws.remoteAddress + ":" + ws.remotePort + ", code: " + ws._closeCode + ", reason: \"" + ws._closeMessage + "\", name: \"" + ws.playerTracker._name + "\"");
-        if (this.config.playerGrayDisconnect) {
+        if (self.config.playerGrayDisconnect) {
             var gray = Math.min(255, (ws.playerTracker.color.r * .2125 +
                 ws.playerTracker.color.g * .7154 + ws.playerTracker.color.b * .0721)) >>> 0,
                 color = {
