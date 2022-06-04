@@ -84,7 +84,7 @@ PacketHandler.prototype.onCompleted = function(protocol) {
     this.protocol = protocol;
     this.socket.sendPacket(new Packet.ClearAll());
     this.socket.sendPacket(new Packet.SetBorder(this.socket.playerTracker, gameServer.border, gameServer.config.serverGamemode, "MultiOgar-Edited " + gameServer.version));
-    gameServer.sendChatMessage(null, this.socket.playerTracker, "MultiOgar " + gameServer.version);
+    gameServer.sendChatMessage(null, this.socket.playerTracker, "MultiOgar-Edited " + gameServer.version);
     if (gameServer.config.serverWelcome1) gameServer.sendChatMessage(null, this.socket.playerTracker, gameServer.config.serverWelcome1);
     if (gameServer.config.serverWelcome2) gameServer.sendChatMessage(null, this.socket.playerTracker, gameServer.config.serverWelcome2);
     if (!gameServer.config.serverChat) gameServer.sendChatMessage(null, this.socket.playerTracker, "The chat is disabled.");
