@@ -481,7 +481,7 @@ class GameServer {
         this.gameMode.updateLB(this, this.leaderboard); // Rename to updateLeaderboard later
         this.largestClient = this.gameMode.rankOne;
     }
-    onChatMSG(from, to, message) { // Rename to onChatMessage later
+    onChatMessage(from, to, message) {
         if (!message) return;
         message = message.trim();
         if (message === "") return;
