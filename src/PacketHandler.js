@@ -99,7 +99,8 @@ PacketHandler.prototype.onJoin = function(message) {
 };
 
 PacketHandler.prototype.onSpectate = function(message) {
-    if (message.length === 1 && !this.socket.playerTracker.cells.length) this.socket.playerTracker.isSpectating = true;
+    var client = this.socket.playerTracker;
+    if (message.length === 1 && !client.cells.length) client.isSpectating = true;
 };
 
 PacketHandler.prototype.onMouse = function(message) {
@@ -113,10 +114,9 @@ PacketHandler.prototype.onKeySpace = function(message) {
 PacketHandler.prototype.onKeyQ = function(message) {
     if (message.length !== 1) return;
     var client = this.socket.playerTracker;
-    if (client.cells.length && this.socket.playerTracker.minions.length) {
-        client.minion.follow = !client.minion.follow;
-        this.gameServer.sendChatMessage(null, client, "Minions follow centerpoint: " + client.minion.frozen + ".");
-    }
+    if (!client.cells.length || !client.minions.length) return;
+    client.minion.follow = !client.minion.follow;
+    this.gameServer.sendChatMessage(null, client, "Minions follow centerpoint: " + client.minion.frozen + ".");
     this.pressQ = true;
 };
 
@@ -125,70 +125,75 @@ PacketHandler.prototype.onKeyW = function(message) {
 };
 
 PacketHandler.prototype.onKeyE = function() {
-    this.socket.playerTracker.minion.split = true;
+    var client = this.socket.playerTracker;
+    if (client.minions.length) client.minion.split = true;
 };
 
 PacketHandler.prototype.onKeyR = function() {
-    this.socket.playerTracker.minion.eject = true;
+    var client = this.socket.playerTracker;
+    if (client.minions.length) client.minion.eject = true;
 };
 
 PacketHandler.prototype.onKeyT = function() {
-    if (!this.socket.playerTracker.minions.length) return;
-    this.socket.playerTracker.minion.frozen = !this.socket.playerTracker.minion.frozen;
-    this.gameServer.sendChatMessage(null, this.socket.playerTracker, "Minions frozen: " + this.socket.playerTracker.minion.frozen + ".");
+    var client = this.socket.playerTracker;
+    if (!client.minions.length) return;
+    client.minion.frozen = !client.minion.frozen;
+    this.gameServer.sendChatMessage(null, client, "Minions frozen: " + client.minion.frozen + ".");
 };
 
 PacketHandler.prototype.onKeyP = function() {
-    if (!this.socket.playerTracker.minions.length) return;
-    this.socket.playerTracker.minion.collect = !this.socket.playerTracker.minion.collect;
-    this.gameServer.sendChatMessage(null, this.socket.playerTracker, "Minion food collection: " + this.socket.playerTracker.minion.collect + ".");
+    var client = this.socket.playerTracker;
+    if (!client.minions.length) return;
+    client.minion.collect = !client.minion.collect;
+    this.gameServer.sendChatMessage(null, client, "Minion food collection: " + client.minion.collect + ".");
 };
 
 PacketHandler.prototype.onKeyO = function() {
     var client = this.socket.playerTracker;
-    if (client.OP.enabled && client.cells.length) {
-        client.frozen = !client.frozen;
-        this.gameServer.sendChatMessage(null, client, "Frozen: " + client.frozen + ".");
-    }
+    if (!client.OP.enabled || !client.cells.length) return;
+    client.frozen = !client.frozen;
+    this.gameServer.sendChatMessage(null, client, "Frozen: " + client.frozen + ".");
 };
 
 PacketHandler.prototype.onKeyM = function() {
     var client = this.socket.playerTracker;
-    if (!client.OP.enabled) return;
-    if (client.cells.length <= 1) client.mergeOverride = false;
-    else client.mergeOverride = !client.mergeOverride;
+    if (!client.OP.enabled || client.cells.length <= 1) return;
+    client.mergeOverride = !client.mergeOverride;
     this.gameServer.sendChatMessage(null, client, "Force merging: " + client.mergeOverride + ".");
 };
 
 PacketHandler.prototype.onKeyI = function() {
     var client = this.socket.playerTracker;
-    if (client.OP.enabled && client.cells.length) {
-        client.recMode = !client.recMode;
-        this.gameServer.sendChatMessage(null, client, "Supersplitter: " + client.recMode + ".");
-    }
+    if (!client.OP.enabled || !client.cells.length) return;
+    client.recMode = !client.recMode;
+    this.gameServer.sendChatMessage(null, client, "Supersplitter: " + client.recMode + ".");
 };
 
 PacketHandler.prototype.onKeyK = function() {
     var client = this.socket.playerTracker;
     if (!client.OP.enabled || !client.cells.length) return;
+    for (;client.cells.length;) this.gameServer.removeNode(client.cells[0]);
     this.gameServer.sendChatMessage(null, client, "You killed yourself.");
-    for (;client.cells.length;) {
-        var cells = client.cells[0];
-        this.gameServer.removeNode(cells);
-    }
 };
 
 PacketHandler.prototype.onKeyY = function() {
     var client = this.socket.playerTracker;
     if (!client.OP.enabled || !client.cells.length) return;
-    for (var cell of client.cells) cell.setSize(cell._size + this.gameServer.config.playerSizeIncrement);
+    for (var i = 0; i < client.cells.length; i++) {
+        var cell = client.cells[i];
+        cell.setSize(cell._size + this.gameServer.config.playerSizeIncrement);
+    }
 };
 
 PacketHandler.prototype.onKeyU = function() {
     var client = this.socket.playerTracker;
     if (!client.OP.enabled || !client.cells.length) return;
-    for (var cell of client.cells)
-        if (20 < cell._size) cell.setSize(cell._size - this.gameServer.config.playerSizeIncrement);
+    var config = this.gameServer.config;
+    for (var i = 0; i < client.cells.length; i++) {
+        var cell = client.cells[i];
+        if (cell._size - config.playerSizeIncrement > 31.623) cell.setSize(cell._size - config.playerSizeIncrement);
+        else cell.setSize(31.623);
+    }
 };
 
 PacketHandler.prototype.onKeyL = function() {
@@ -208,12 +213,13 @@ PacketHandler.prototype.onKeyH = function() {
     if (!client.OP.enabled || !client.cells.length) return;
     var gameServer = this.gameServer,
         config = gameServer.config,
-        minSize = Math.sqrt(1010);
-    for (var cell of client.cells) {
-        for (;minSize < cell._size;) {
-            var angle = 6.28 * Math.random(),
-                loss = gameServer.config.ejectMinSize;
-            if (gameServer.config.ejectMaxSize > loss) loss = Math.random() * (gameServer.config.ejectMaxSize - loss) + loss;
+        minSize = 31.623;
+    for (var i = 0; i < client.cells.length; i++) {
+        var cell = client.cells[i];
+        while (cell._size > minSize) {
+            var angle = Math.PI * 2 * Math.random(),
+                loss = config.ejectMinSize;
+            if (config.ejectMaxSize > loss) loss = Math.random() * (config.ejectMaxSize - loss) + loss;
             var size = cell.radius - (loss + 5) * (loss + 5);
             cell.setSize(Math.sqrt(size));
             var pos = {
@@ -235,9 +241,7 @@ PacketHandler.prototype.onKeyZ = function() {
     var client = this.socket.playerTracker;
     if (!client.OP.enabled || !client.cells.length) return;
     client.color = this.gameServer.randomColor();
-    client.cells.forEach(function(cell) {
-        cell.color = client.color;
-    });
+    for (var i = 0; i < client.cells.length; i++) client.cells[i].color = client.color;
     this.gameServer.sendChatMessage(null, client, "Changed your color to (" + client.color.r + ", " + client.color.g + ", " + client.color.b + ").");
 };
 
@@ -268,34 +272,20 @@ PacketHandler.prototype.onKeyC = function() {
 PacketHandler.prototype.onKeyB = function() {
     var client = this.socket.playerTracker;
     if (!client.OP.enabled) return;
-    var colors = [
-            {r: 255, g: 0, b: 0},
-            {r: 255, g: 155, b: 0},
-            {r: 255, g: 255, b: 0},
-            {r: 0, g: 255, b: 0},
-            {r: 0, g: 0, b: 255},
-            {r: 140, g: 0, b: 185},
-            {r: 255, g: 0, b: 255},
-            {r: 140, g: 70, b: 15},
-            {r: 100, g: 100, b: 100},
-            {r: 170, g: 170, b: 170},
-            {r: 255, g: 255, b: 255},
-            {r: 0, g: 0, b: 0}
-        ],
-        index = Math.floor(Math.random() * colors.length),
-        RGB = colors[index];
-    this.gameServer.sendChatMessage(null, client, "Food color: (" + RGB.r + ", " + RGB.g + ", " + RGB.b + ").");
-    return client.OP.foodColor = {
+    var RGB = this.gameServer.randomColor();
+    client.OP.foodColor = {
         r: RGB.r,
         g: RGB.g,
         b: RGB.b
     };
+    this.gameServer.sendChatMessage(null, client, "Food color: (" + RGB.r + ", " + RGB.g + ", " + RGB.b + ").");
 };
 
 PacketHandler.prototype.onKeyG = function() {
     var client = this.socket.playerTracker;
     if (!client.OP.enabled || !client.cells.length) return;
-    for (var cell of client.cells) {
+    for (var i = 0; i < client.cells.length; i++) {
+        var cell = client.cells[i];
         cell.position.x = client.mouse.x;
         cell.position.y = client.mouse.y;
         this.gameServer.updateNodeQuad(cell);
@@ -306,7 +296,8 @@ PacketHandler.prototype.onKeyG = function() {
 PacketHandler.prototype.onKeyN = function() {
     var client = this.socket.playerTracker;
     if (!client.OP.enabled) return;
-    var config = this.gameServer.config;
+    var gameServer = this.gameServer,
+        config = gameServer.config;
     for (var i = 0; i < client.cells.length; i++) {
         var cell = client.cells[i],
             angle = Math.random() * 2 * Math.PI,
@@ -316,9 +307,9 @@ PacketHandler.prototype.onKeyN = function() {
             },
             size = config.foodMinSize;
         if (config.foodMaxSize > size) size = Math.random() * (config.foodMaxSize - size) + size;
-        var food = new Entity.Food(this.gameServer, null, pos, size);
-        food.color = this.gameServer.randomColor();
-        this.gameServer.addNode(food);
+        var food = new Entity.Food(gameServer, null, pos, size);
+        food.color = gameServer.randomColor();
+        gameServer.addNode(food);
         food.setBoost(200 + 200 * Math.random(), angle);
     }
 };
@@ -327,18 +318,27 @@ PacketHandler.prototype.onKeyV = function() {
     var client = this.socket.playerTracker;
     if (!client.OP.enabled) return;
     var gameServer = this.gameServer,
+        config = gameServer.config;
         pos = {
             x: client.mouse.x - client.centerPos.x,
             y: client.mouse.y - client.centerPos.y
         },
-        angle = 2 * Math.PI * Math.random();
-    if (client.cells.length) angle = Math.atan2(pos.x, pos.y);
-    var size = gameServer.config.ejectMinSize;
-    if (gameServer.config.ejectMaxSize > size) size = Math.random() * (gameServer.config.ejectMaxSize - size) + size;
+        angle = Math.atan2(pos.x, pos.y);
+    var size = config.ejectMinSize;
+    if (config.ejectMaxSize > size) size = Math.random() * (config.ejectMaxSize - size) + size;
     var eject = new Entity.EjectedMass(gameServer, null, client.mouse, size);
-    eject.color = client.isSpectating || gameServer.config.ejectRandomColor === 1 ? gameServer.randomColor() : client.color;
+    eject.color = client.isSpectating || config.ejectRandomColor === 1 ? gameServer.randomColor() : client.color;
     gameServer.addNode(eject);
-    eject.setBoost((client.isSpectating ? Math.random() : 1) * gameServer.config.ejectSpeed, angle);
+    eject.setBoost(config.ejectSpeed, angle);
+};
+
+PacketHandler.prototype.onKeyX = function() {
+    var client = this.socket.playerTracker;
+    if (!client.cells.length) return;
+    client.rainbowEnabled = !client.rainbowEnabled;
+    if (client.rainbowEnabled) this.intervalID = setInterval(this.rainbowLoop, 40);
+    else clearInterval(this.intervalID);
+    this.gameServer.sendChatMessage(null, client, "Rainbow: " + client.rainbowEnabled + ".");
 };
 
 PacketHandler.prototype.rainbowLoop = function() {
@@ -375,18 +375,8 @@ PacketHandler.prototype.rainbowLoop = function() {
     if (this.tickRainbow > 27) this.tickRainbow = 0;
     var client = this.socket.playerTracker;
     client.color = colors[this.tickRainbow];
-    client.cells.forEach(function(cell) {
-        cell.color = client.color;
-    });
+    for (var i = 0; i < client.cells.length; i++) client.cells[i].color = client.color;
     this.tickRainbow += 1;
-};
-
-PacketHandler.prototype.onKeyX = function() {
-    var client = this.socket.playerTracker;
-    client.rainbowEnabled = !client.rainbowEnabled;
-    if (client.rainbowEnabled) this.intervalID = setInterval(this.rainbowLoop, 40);
-    else clearInterval(this.intervalID);
-    this.gameServer.sendChatMessage(null, client, "Rainbow: " + client.rainbowEnabled + ".");
 };
 
 PacketHandler.prototype.onChat = function(message) {
