@@ -176,3 +176,16 @@ vinesauce
 virus
 wojak
 yaranaika
+mammoth
+lion
+sumo
+hunter
+coyote
+fox
+snake
+bat
+lizard
+wasp
+spider
+fly
+tiger
