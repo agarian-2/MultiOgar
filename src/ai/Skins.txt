@@ -189,3 +189,9 @@ wasp
 spider
 fly
 tiger
+zebra
+uncle_sam
+venus
+uranus
+spitfire
+earth_day
