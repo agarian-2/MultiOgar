@@ -113,11 +113,11 @@ PacketHandler.prototype.onKeySpace = function(message) {
 
 PacketHandler.prototype.onKeyQ = function(message) {
     if (message.length !== 1) return;
+    this.pressQ = true;
     var client = this.socket.playerTracker;
     if (!client.cells.length || !client.minions.length) return;
     client.minion.follow = !client.minion.follow;
     this.gameServer.sendChatMessage(null, client, "Minions follow centerpoint: " + client.minion.frozen + ".");
-    this.pressQ = true;
 };
 
 PacketHandler.prototype.onKeyW = function(message) {
