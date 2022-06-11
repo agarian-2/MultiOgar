@@ -195,3 +195,7 @@ venus
 uranus
 spitfire
 earth_day
+wolf
+firework
+stars
+wicked_cat
