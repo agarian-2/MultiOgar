@@ -1,12 +1,14 @@
-function FakeSocket(server) {
-    this.server = server;
-    this.isCloseReq = false;
+"use strict";
+
+class FakeSocket {
+    constructor(gameServer) {
+        this.gameServer = gameServer;
+        this.isCloseReq = false;
+    }
+    sendPacket() {}
+    close() {
+        this.isCloseReq = true;
+    }
 }
 
 module.exports = FakeSocket;
-
-FakeSocket.prototype.sendPacket = function() {};
-
-FakeSocket.prototype.close = function() {
-    this.isCloseReq = true;
-};
