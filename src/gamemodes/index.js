@@ -7,8 +7,9 @@ module.exports = {
     Tournament: require("./Tournament"),
     HungerGames: require("./HungerGames")
 };
-var get = function(id) {
-    var mode;
+
+const get = id => {
+    let mode;
     switch (id) {
         case 1:
             mode = new module.exports.Teams;
@@ -30,4 +31,5 @@ var get = function(id) {
     }
     return mode;
 };
+
 module.exports.get = get;
