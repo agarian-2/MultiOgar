@@ -1,37 +1,31 @@
-var Mode = require("./Mode");
+"use strict";
+const Mode = require("./Mode");
 
-function FFA() {
-    Mode.apply(this, Array.prototype.slice.call(arguments));
-    this.ID = 0;
-    this.decayMod = 1;
-    this.name = "Free For All";
+class FFA extends Mode {
+    constructor() {
+        super();
+        this.ID = 0;
+        this.decayMod = 1;
+        this.name = "Free For All";
+    }
+    onPlayerSpawn(gameServer, client) {
+        client.color = gameServer.randomColor();
+        gameServer.spawnPlayer(client, gameServer.randomPosition());
+    }
+    updateLB(gameServer, lb) {
+        gameServer.leaderboardType = this.packetLB;
+        let pos = 0;
+        for (let i = 0; i < gameServer.clients.length; i++) {
+            let client = gameServer.clients[i].playerTracker;
+            if (client.isRemoved || !client.cells.length || client.socket.isConnected === false) continue;
+            let j;
+            for (j = 0; j < pos; j++)
+                if (lb[j]._score < client._score) break;
+            lb.splice(j, 0, client);
+            pos++;
+        }
+        this.rankOne = lb[0];
+    }
 }
 
 module.exports = FFA;
-FFA.prototype = new Mode;
-
-FFA.prototype.onPlayerSpawn = function(gameServer, player) {
-    player.color = gameServer.randomColor();
-    gameServer.spawnPlayer(player, gameServer.randomPosition());
-};
-
-FFA.prototype.updateLB = function(gameServer, lb) {
-    gameServer.leaderboardType = this.packetLB;
-    var pos = 0;
-    for (var i = 0; i < gameServer.clients.length; i++) {
-        var client = gameServer.clients[i].playerTracker;
-        if (client.isRemoved || !client.cells.length || client.socket.isConnected === false) continue;
-        for (var j = 0; j < pos; j++)
-            if (lb[j]._score < client._score) break;
-        lb.splice(j, 0, client);
-        pos++;
-    }
-    var clients = gameServer.clients.filter(function(player) {
-        client = player.playerTracker;
-        return !client.isRemoved && client.cells.length && client.socket.isConnected !== false;
-    });
-    clients.sort(function(a, b) {
-        return b.playerTracker._score - a.playerTracker._score;
-    });
-    if (clients[0]) this.rankOne = clients[0].playerTracker;
-};
