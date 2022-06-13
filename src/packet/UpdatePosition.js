@@ -1,19 +1,21 @@
-var BinaryWriter = require("./BinaryWriter");
+"use strict";
+const BinaryWriter = require("./BinaryWriter");
 
-function UpdatePosition(playerTracker, x, y, scale) {
-    this.playerTracker = playerTracker,
-    this.x = x;
-    this.y = y;
-    this.scale = scale;
+class UpdatePosition {
+    constructor(playerTracker, x, y, scale) {
+        this.playerTracker = playerTracker,
+        this.x = x;
+        this.y = y;
+        this.scale = scale;
+    }
+    build() {
+        let writer = new BinaryWriter();
+        writer.writeUInt8(0x11);
+        writer.writeFloat(this.x + this.playerTracker.scrambleX);
+        writer.writeFloat(this.y + this.playerTracker.scrambleY);
+        writer.writeFloat(this.scale);
+        return writer.toBuffer();
+    }
 }
 
 module.exports = UpdatePosition;
-
-UpdatePosition.prototype.build = function() {
-    var writer = new BinaryWriter();
-    writer.writeUInt8(0x11);
-    writer.writeFloat(this.x + this.playerTracker.scrambleX);
-    writer.writeFloat(this.y + this.playerTracker.scrambleY);
-    writer.writeFloat(this.scale);
-    return writer.toBuffer();
-};
