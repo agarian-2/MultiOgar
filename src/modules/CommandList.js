@@ -217,7 +217,7 @@ class CommandList {
             for (;gameServer.nodesEject.length;) gameServer.removeNode(gameServer.nodesEject[0]);
             for (;gameServer.nodesFood.length;) gameServer.removeNode(gameServer.nodesFood[0]);
             for (;gameServer.nodesVirus.length;) gameServer.removeNode(gameServer.nodesVirus[0]);
-            if (gameServer.gameMode.ID !== 2)
+            if (gameServer.gameMode.ID === 2)
                 for (;gameServer.gameMode.mothercells.length;) gameServer.removeNode(gameServer.gameMode.mothercells[0]);
             for (let i = 0; i < gameServer.clients.length; i++) {
                 let playerTracker = gameServer.clients[i].playerTracker;
