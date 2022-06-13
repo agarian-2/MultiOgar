@@ -30,7 +30,7 @@ class UpdateLeaderboard {
     }
     userText(protocol) {
         let writer = new BinaryWriter();
-        writeCount(writer, 0x31, this.leaderboard.length);
+        this.writeCount(writer, 0x31, this.leaderboard.length);
         for (let i = 0; i < this.leaderboard.length; i++) {
             let item = this.leaderboard[i] || "";
             if (protocol < 11) writer.writeUInt32(0);
@@ -51,7 +51,7 @@ class UpdateLeaderboard {
     }
     FFA5() {
         let writer = new BinaryWriter();
-        writeCount(writer, 0x31, this.leaderboardCount);
+        this.writeCount(writer, 0x31, this.leaderboardCount);
         for (let i = 0; i < this.leaderboardCount; i++) {
             let item = this.leaderboard[i];
             if (item == null) return null;
@@ -66,7 +66,7 @@ class UpdateLeaderboard {
     }
     FFA6() {
         let writer = new BinaryWriter();
-        writeCount(writer, 0x31, this.leaderboardCount);
+        this.writeCount(writer, 0x31, this.leaderboardCount);
         for (let i = 0; i < this.leaderboardCount; i++) {
             let item = this.leaderboard[i];
             if (item == null) return null;
@@ -125,7 +125,7 @@ class UpdateLeaderboard {
     }
     buildTeam() {
         let writer = new BinaryWriter();
-        writeCount(writer, 0x32, this.leaderboard.length);
+        this.writeCount(writer, 0x32, this.leaderboard.length);
         for (let i = 0; i < this.leaderboard.length; i++) {
             let value = this.leaderboard[i];
             if (value == null) return null;
