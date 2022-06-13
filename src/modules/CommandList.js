@@ -3,6 +3,8 @@ const Log = require("./Logger");
 const Entity = require("../entity");
 const GameMode = require("../gamemodes");
 const QuadNode = require("./QuadNode.js");
+const ini = require("./ini.js");
+const fs = require("fs");
 
 class CommandList {
     constructor() {
@@ -13,7 +15,6 @@ class CommandList {
         else return name.trim();
     }
     saveIpBanList(gameServer) {
-        let fs = require("fs");
         try {
             let banlist = fs.createWriteStream("../src/ipbanlist.txt");
             for (let v of gameServer.ipBanList.sort()) banlist.write(v + "\n");
@@ -162,7 +163,7 @@ class CommandList {
         Log.print("└───┴────────────────────────────┘");
     }
     op(gameServer, split) {
-        let id = parseInt(split[1], 10),
+        let id = parseInt(split[1]),
             client = this.clientByID(id, gameServer);
         if (isNaN(id)) return Log.warn("Please specify a valid player ID.");
         if (client == null) return Log.warn("Player ID (" + id + ") was not found.");
@@ -197,8 +198,8 @@ class CommandList {
         Log.print("Sending your message to all players.");
     }
     border(gameServer, split) {
-        let width = parseInt(split[1], 10),
-            height = parseInt(split[2], 10);
+        let width = parseInt(split[1]),
+            height = parseInt(split[2]);
         if (isNaN(width) || isNaN(height)) return Log.warn("Please specify a valid border width and height.");
         for (;gameServer.nodesEject.length;) gameServer.removeNode(gameServer.nodesEject[0]);
         for (;gameServer.nodesFood.length;) gameServer.removeNode(gameServer.nodesFood[0]);
@@ -242,7 +243,7 @@ class CommandList {
         }
     }
     explode(gameServer, split) {
-        let id = parseInt(split[1], 10),
+        let id = parseInt(split[1]),
             client = this.clientByID(id, gameServer);
         if (isNaN(id)) return Log.warn("Please specify a valid player ID.");
         if (client == null) return Log.warn("Player ID (" + id + ") was not found.");
@@ -269,8 +270,8 @@ class CommandList {
         Log.print("Successfully exploded " + this.trimName(client._name) + ".");
     }
     minion(gameServer, split) {
-        let id = parseInt(split[1], 10),
-            add = parseInt(split[2], 10),
+        let id = parseInt(split[1]),
+            add = parseInt(split[2]),
             name = split.slice(3, split.length).join(" "),
             client = this.clientByID(id, gameServer);
         if (isNaN(id)) return Log.warn("Please specify a valid player ID.");
@@ -295,7 +296,7 @@ class CommandList {
         }
     }
     addbot(gameServer, split) {
-        let add = parseInt(split[1], 10);
+        let add = parseInt(split[1]);
         if (isNaN(add)) return Log.warn("Please specify an amount of bots to add.");
         for (let i = 0; i < add; i++) gameServer.bots.addBot();
         Log.print("Added " + add + " player bots.");
@@ -310,7 +311,7 @@ class CommandList {
                     if (!(i > 1 && "*" === ipSplit[i]) && (isNaN(ipSplit[i]) || ipSplit[i] < 0 || ipSplit[i] >= 256)) return Log.warn(invalid);
                 return ipSplit.length !== 4 ? Log.warn(invalid) : ban(gameServer, split, ip);
             }
-            let id = parseInt(split[1], 10);
+            let id = parseInt(split[1]);
             if (isNaN(id)) return Log.warn(invalid);
             else {
                 let ip = null;
@@ -334,7 +335,7 @@ class CommandList {
         for (let i = 0; i < gameServer.ipBanList.length; i += 2) Log.print(" " + this.fillChar(gameServer.ipBanList[i], " ", 15) + " | " + (gameServer.ipBanList.length === i + 1 ? "" : gameServer.ipBanList[i + 1]));
     }
     kickbot(gameServer, split) {
-        let toRemove = parseInt(split[1], 10);
+        let toRemove = parseInt(split[1]);
         if (isNaN(toRemove)) toRemove = gameServer.clients.length;
         let removed = 0;
         for (let i = 0; i < gameServer.clients.length; i++) {
@@ -349,7 +350,7 @@ class CommandList {
         else Log.print("Kicked " + removed + " bots.");
     }
     kickmi(gameServer, split) {
-        let toRemove = parseInt(split[1], 10);
+        let toRemove = parseInt(split[1]);
         if (isNaN(toRemove)) toRemove = gameServer.clients.length;
         let removed = 0;
         for (let i = 0; i < gameServer.clients.length; i++) {
@@ -391,7 +392,7 @@ class CommandList {
         let key = split[1],
             value = split[2];
         if (value.indexOf(".") !== -1) value = parseFloat(value);
-        else value = parseInt(value, 10);
+        else value = parseInt(value);
         if (value == null || isNaN(value)) return Log.warn("Invalid value: " + value + ".");
         if (!gameServer.config.hasOwnProperty(key)) return Log.warn("Unknown config value: " + key + ".");
         gameServer.config[key] = value;
@@ -401,7 +402,7 @@ class CommandList {
         Log.print("Set " + key + " to " + gameServer.config[key]);
     }
     color(gameServer, split) {
-        let id = parseInt(split[1], 10),
+        let id = parseInt(split[1]),
             client = this.clientByID(id, gameServer);
         if (isNaN(id)) return Log.warn("Please specify a valid player ID.");
         if (client == null) return Log.warn("Player ID (" + id + ") was not found.");
@@ -410,9 +411,9 @@ class CommandList {
             g: 0,
             b: 0
         };
-        color.r = Math.max(Math.min(parseInt(split[2], 10), 255), 0);
-        color.g = Math.max(Math.min(parseInt(split[3], 10), 255), 0);
-        color.b = Math.max(Math.min(parseInt(split[4], 10), 255), 0);
+        color.r = Math.max(Math.min(parseInt(split[2]), 255), 0);
+        color.g = Math.max(Math.min(parseInt(split[3]), 255), 0);
+        color.b = Math.max(Math.min(parseInt(split[4]), 255), 0);
         if (!client.cells.length) return Log.warn("The specified player is not spawned in the game.");
         if (isNaN(color.r) || isNaN(color.g) || isNaN(color.b)) return Log.warn("Please specify a valid RGB color.");
         client.color = color;
@@ -426,7 +427,7 @@ class CommandList {
         process.exit(1);
     }
     kick(gameServer, split) {
-        let id = parseInt(split[1], 10);
+        let id = parseInt(split[1]);
         if (isNaN(id)) return Log.warn("Please specify a valid player ID.");
         let count = 0;
         for (let i = 0; i < gameServer.clients.length; i++) {
@@ -456,7 +457,7 @@ class CommandList {
         Log.print("Kicked " + pCount + " players, " + bCount + " bots, and " + mCount + " minions from the server.");
     }
     kill(gameServer, split) {
-        let id = parseInt(split[1], 10),
+        let id = parseInt(split[1]),
             client = this.clientByID(id, gameServer);
         if (isNaN(id)) return Log.warn("Please specify a valid player ID.");
         if (client == null) return Log.warn("Player ID (" + id + ") was not found.");
@@ -482,9 +483,9 @@ class CommandList {
         Log.print("Killed " + pCount + " players, " + bCount + " bots, and " + mCount + " minions.");
     }
     mass(gameServer, split) {
-        let id = parseInt(split[1], 10),
+        let id = parseInt(split[1]),
             client = this.clientByID(id, gameServer),
-            mass = parseInt(split[2], 10);
+            mass = parseInt(split[2]);
         if (isNaN(id)) return Log.warn("Please specify a valid player ID.");
         if (client == null) return Log.warn("Player ID (" + id + ") was not found.");
         if (isNaN(mass)) return Log.warn("Please specify a valid mass number.");
@@ -494,7 +495,7 @@ class CommandList {
         Log.print("Set mass of " + this.trimName(client._name) + " to " + (size * size / 100).toFixed(3) + ".");
     }
     calc(gameServer, split) {
-        let num = parseInt(split[1], 10);
+        let num = parseInt(split[1]);
         if (isNaN(num)) return Log.warn("Please specify a valid number.");
         let to = split[2];
         if (to !== "mass" && to !== "size") return Log.warn("Please specify either 'mass' or 'size'.");
@@ -502,20 +503,20 @@ class CommandList {
         else Log.print("The specified mass is " + (Math.sqrt(num * 100)).toFixed(6) + " in size.");
     }
     spawnmass(gameServer, split) {
-        let id = parseInt(split[1], 10),
+        let id = parseInt(split[1]),
             client = this.clientByID(id, gameServer);
         if (isNaN(id)) return Log.warn("Please specify a valid player ID.");
         if (client == null) return Log.warn("Player ID (" + id + ") was not found.");
-        let mass = Math.max(parseInt(split[2], 10), 9),
+        let mass = Math.max(parseInt(split[2]), 9),
             size = Math.sqrt(100 * mass);
         if (isNaN(mass)) return Log.warn("Please specify a valid mass.");
         client.spawnMass = size;
         Log.print("Set spawn mass of " + this.trimName(client._name) + " to " + (size * size / 100).toFixed(3) + ".");
     }
     speed(gameServer, split) {
-        let id = parseInt(split[1], 10),
+        let id = parseInt(split[1]),
             client = this.clientByID(id, gameServer),
-            speed = parseInt(split[2], 10);
+            speed = parseInt(split[2]);
         if (isNaN(id)) return Log.warn("Please specify a valid player ID.");
         if (client == null) return Log.warn("Player ID (" + id + ") was not found.");
         if (isNaN(speed)) return Log.warn("Please specify a valid speed.");
@@ -523,7 +524,7 @@ class CommandList {
         Log.print("Set move speed of " + this.trimName(client._name) + " to " + (!speed ? gameServer.config.playerSpeed : speed) + ".");
     }
     merge(gameServer, split) {
-        let id = parseInt(split[1], 10),
+        let id = parseInt(split[1]),
             client = this.clientByID(id, gameServer);
         if (isNaN(id)) return Log.warn("Please specify a valid player ID.");
         if (client == null) return Log.warn("Player ID (" + id + ") was not found.");
@@ -533,7 +534,7 @@ class CommandList {
         Log.print(this.trimName(client._name) + " is " + (client.mergeOverride ? "now" : "no longer") + " merging.");
     }
     rec(gameServer, split) {
-        let id = parseInt(split[1], 10),
+        let id = parseInt(split[1]),
             client = this.clientByID(id, gameServer);
         if (isNaN(id)) return Log.warn("Please specify a valid player ID.");
         if (client == null) return Log.warn("Player ID (" + id + ") was not found.");
@@ -541,9 +542,9 @@ class CommandList {
         Log.print(this.trimName(client._name) + " is " + (client.recMode ? "now" : "no longer") + " in supersplitter mode.");
     }
     split(gameServer, split) {
-        let id = parseInt(split[1], 10),
+        let id = parseInt(split[1]),
             client = this.clientByID(id, gameServer),
-            amount = parseInt(split[2], 10);
+            amount = parseInt(split[2]);
         if (isNaN(id)) return Log.warn("Please specify a valid player ID.");
         if (client == null) return Log.warn("Player ID (" + id + ") was not found.");
         if (isNaN(amount)) return Log.warn("Please specify a valid split count.");
@@ -554,7 +555,7 @@ class CommandList {
         Log.print("Forced " + this.trimName(client._name) + " to split " + amount + " times.");
     }
     name(gameServer, split) {
-        let id = parseInt(split[1], 10),
+        let id = parseInt(split[1]),
             client = this.clientByID(id, gameServer),
             name = split.slice(2, split.length).join(" ");
         if (isNaN(id)) return Log.warn("Please specify a valid player ID.");
@@ -574,7 +575,7 @@ class CommandList {
         Log.print("Unbanned IP: " + ip + ".");
     }
     freeze(gameServer, split) {
-        let id = parseInt(split[1], 10),
+        let id = parseInt(split[1]),
             client = this.clientByID(id, gameServer);
         if (isNaN(id)) return Log.warn("Please specify a valid player ID.");
         if (client == null) return Log.warn("Player ID (" + id + ") was not found.");
@@ -583,7 +584,7 @@ class CommandList {
         Log.print((client.frozen ? "Froze " : "Unfroze") + this.trimName(client._name) + ".");
     }
     getcolor(gameServer, split) {
-        let id = parseInt(split[1], 10),
+        let id = parseInt(split[1]),
             client = this.clientByID(id, gameServer);
         if (isNaN(id)) return Log.print("Please specify a valid player ID.");
         if (client == null) return Log.warn("Player ID (" + id + ") was not found.");
@@ -591,13 +592,13 @@ class CommandList {
         Log.print(this.trimName(client._name) + "'s RGB color is (" + client.color.r + ", " + client.color.g + ", " + client.color.b + ").");
     }
     teleport(gameServer, split) {
-        let id = parseInt(split[1], 10),
+        let id = parseInt(split[1]),
             client = this.clientByID(id, gameServer);
         if (isNaN(id)) return Log.warn("Please specify a valid player ID.");
         if (client == null) return Log.warn("Player ID (" + id + ") was not found.");
         let pos = {
-            x: parseInt(split[2], 10),
-            y: parseInt(split[3], 10)
+            x: parseInt(split[2]),
+            y: parseInt(split[3])
         };
         if (isNaN(pos.x) || isNaN(pos.y)) return Log.warn("Please specify valid coordinates.");
         if (!client.cells.length) return Log.warn("The specified player is not spawned in the game.");
@@ -613,10 +614,10 @@ class CommandList {
         let entity = split[1];
         if (entity !== "virus" && entity !== "food" && entity !== "mothercell") return Log.warn("Please specify either 'virus', 'food', or 'mothercell'.");
         let pos = {
-                x: parseInt(split[2], 10),
-                y: parseInt(split[3], 10)
+                x: parseInt(split[2]),
+                y: parseInt(split[3])
             },
-            mass = parseInt(split[4], 10);
+            mass = parseInt(split[4]);
         if (isNaN(pos.x) || isNaN(pos.y)) return Log.warn("Please specify valid coordinates.");
         let size = 1;
         if (entity === "virus") size = gameServer.config.virusMinSize;
@@ -640,7 +641,7 @@ class CommandList {
         }
     }
     replace(gameServer, split) {
-        let id = parseInt(split[1], 10),
+        let id = parseInt(split[1]),
             client = this.clientByID(id, gameServer),
             entity = split[2];
         if (isNaN(id)) return Log.warn("Please specify a valid player ID.");
@@ -668,7 +669,7 @@ class CommandList {
         else if (entity === "mothercell") Log.print("Replaced " + this.trimName(client._name) + " with mothercells.");
     }
     virus(gameServer, split) {
-        let id = parseInt(split[1], 10),
+        let id = parseInt(split[1]),
             client = this.clientByID(id, gameServer);
         if (isNaN(id)) return Log.warn("Please specify a valid player ID.");
         if (client == null) return Log.warn("Player ID (" + id + ") was not found.");
@@ -678,7 +679,7 @@ class CommandList {
         Log.print("Spawned a virus under " + this.trimName(client._name) + ".");
     }
     mute(gameServer, split) {
-        let id = parseInt(split[1], 10),
+        let id = parseInt(split[1]),
             client = this.clientByID(id, gameServer);
         if (isNaN(id)) return Log.warn("Please specify a valid player ID.");
         if (client == null) return Log.warn("Player ID (" + id + ") was not found.");
@@ -747,8 +748,7 @@ class CommandList {
         Log.print("Reloaded all configuration files.");
     }
     status(gameServer) { // Add fancy borders?
-        let ini = require("./ini.js"),
-            humans = 0,
+        let humans = 0,
             bots = 0,
             mem = process.memoryUsage();
         for (let i = 0; i < gameServer.clients.length; i++) {
@@ -785,7 +785,7 @@ class CommandList {
     }
     gamemode(gameServer, split) {
         try {
-            let id = parseInt(split[1], 10),
+            let id = parseInt(split[1]),
                 gameMode = GameMode.get(id);
             gameServer.gameMode.onChange(gameServer);
             gameServer.gameMode = gameMode;
