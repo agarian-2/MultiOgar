@@ -13,7 +13,7 @@ class PlayerCell extends Cell {
         return true;
     }
     getSpeed(dist) {
-        let speed = 2.2 * Math.pow(this._size, -.45) * 40;
+        let speed = 2.2 * Math.pow(this._size, -.439) * 40;
         speed *= (this.owner.customSpeed || this.gameServer.config.playerSpeed) / 30;
         return speed * Math.min(dist , 32) / 32;
     }
