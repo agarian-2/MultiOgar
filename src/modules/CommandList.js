@@ -11,8 +11,7 @@ class CommandList {
         this.list = {};
     }
     trimName(name) {
-        if (!name) return "An unnamed cell";
-        else return name.trim();
+        return name.trim() || "An unnamed cell";
     }
     saveIpBanList(gameServer) {
         try {
@@ -757,8 +756,9 @@ class CommandList {
         }
         let scores = [];
         for (let i = 0; i < gameServer.clients.length; i++) {
-            let totalMass = 0;
-            for (let j = 0; j < gameServer.clients[i].playerTracker.cells.length; j++) totalMass += gameServer.sizeToMass(gameServer.clients[i].playerTracker.cells[j]._size);
+            let totalMass = 0,
+                client = gameServer.clients[i].playerTracker;
+            for (let j = 0; j < client.cells.length; j++) totalMass += gameServer.sizeToMass(client.cells[j]._size);
             scores.push(totalMass);
         }
         if (!gameServer.clients.length) scores = [0];
@@ -770,7 +770,7 @@ class CommandList {
         Log.print("Server Uptime: " + Math.floor(process.uptime() / 60) + " minutes."),
         Log.print("Current Memory Usage: " + Math.round(mem.heapUsed / 1048576 * 10) / 10 + "/" + Math.round(mem.heapTotal / 1048576 * 10) / 10 + " MB."),
         Log.print("Current Game Mode: " + gameServer.gameMode.name + "."),
-        Log.print("Current Update Time: " + gameServer.updateTimeAvg.toFixed(3) + " ms (" + ini.getLagMessage(gameServer.updateTimeAvg) + ").");
+        Log.print("Current Update Time: " + gameServer.updateTimeAvg.toFixed(3) + " ms (" + ini.getLagMessage(gameServer.updateTimeAvg) + ")."),
         Log.print("-----------------------------------------");
     }
     debug(gameServer) { // Add fancy borders?
