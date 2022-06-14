@@ -2,6 +2,7 @@
 const Packet = require("./packet");
 const BinaryReader = require("./packet/BinaryReader");
 const Entity = require("./entity");
+const fs = require("fs");
 
 class PacketHandler {
     constructor(gameServer, socket) {
@@ -22,6 +23,7 @@ class PacketHandler {
         this.handler = {
             254: this.onProtocol.bind(this)
         };
+        this.randomSkins = fs.readFileSync("../src/ai/Skins.txt", "utf8").split(/[\r\n]+/).filter(x => x !== "");
     }
     handleMessage(message) {
         if (this.handler.hasOwnProperty(message[0])) {
@@ -371,14 +373,8 @@ class PacketHandler {
         this.mouse();
     }
     randomSkin() {
-        let randomSkins = [],
-            fs = require("fs"),
-            skin = null;
-        if (fs.existsSync("../src/ai/Skins.txt")) randomSkins = fs.readFileSync("../src/ai/Skins.txt", "utf8").split(/[\r\n]+/).filter(x => x !== "");
-        if (randomSkins.length) {
-            let index = (randomSkins.length * Math.random()) >>> 0;
-            skin = randomSkins[index];
-        }
+        let skin = null;
+        if (this.randomSkins.length) skin = this.randomSkins[Math.floor(Math.random() * this.randomSkins.length)];
         return skin;
     }
     nickName(text) {
