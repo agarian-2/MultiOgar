@@ -227,7 +227,7 @@ class PlayerCommand {
         this.writeLine("Virus nodes: " + this.gameServer.nodesVirus.length),
         this.writeLine("Ejected nodes: " + this.gameServer.nodesEject.length),
         this.writeLine("Food nodes: " + this.gameServer.nodesFood.length);
-        if (this.gameServer.gameMode.ID != 2) this.writeLine("MotherCell nodes: 0");
+        if (this.gameServer.gameMode.ID !== 2) this.writeLine("MotherCell nodes: 0");
         else this.writeLine("Mothercell nodes: " + this.gameServer.gameMode.mothercells.length);
         this.writeLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
     }
@@ -392,7 +392,7 @@ class PlayerCommand {
         this.gameServer.loadConfig();
         this.gameServer.loadBanList();
         this.writeLine("Reloaded the configuration files succesully.");
-        Log.info(this.getName() + " reload the configuration files.");
+        Log.info(this.getName() + " reloaded the configuration files.");
     }
     restart() {
         if (!this.playerTracker.OP.enabled) return this.writeLine("[ERROR] You must have OP mode to use this command.");
