@@ -15,10 +15,6 @@ class Experimental extends FFA {
     onServerInit(gameServer) {
         gameServer.running = true;
         let self = this;
-        Entity.Virus.prototype.onEat = function(cell) {
-            let boost = Math.atan2(cell.boostDirection.x, cell.boostDirection.y);
-            this.setBoost(gameServer.config.virusEjectSpeed - 460, boost);
-        };
         Entity.MotherCell.prototype.onAdd = function() {
             self.mothercells.push(this);
         };
@@ -48,7 +44,6 @@ class Experimental extends FFA {
         for (;gameServer.nodesEject.length;) gameServer.removeNode(gameServer.nodesEject[0]);
         for (;gameServer.nodesFood.length;) gameServer.removeNode(gameServer.nodesFood[0]);
         for (;gameServer.nodesVirus.length;) gameServer.removeNode(gameServer.nodesVirus[0]);
-        Entity.Virus.prototype.feed = require("../entity/Virus").prototype.feed;
     }
 }
 
