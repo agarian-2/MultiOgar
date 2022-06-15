@@ -204,10 +204,6 @@ class PlayerTracker {
         this.updateViewNodes(this.cells.length);
         let viewBaseX = this.gameServer.config.serverViewBaseX,
             viewBaseY = this.gameServer.config.serverViewBaseY;
-        if (this.isSpectating) {
-            viewBaseX = 2225;
-            viewBaseY = 1275;
-        }
         let scale = Math.max(this.getScale(), this.gameServer.config.serverMinScale),
             width = (viewBaseX / scale) / 2,
             height = (viewBaseY / scale) / 2;
