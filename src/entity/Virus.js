@@ -17,7 +17,7 @@ class Virus extends Cell {
         if (this.gameServer.nodesVirus.length < this.gameServer.config.virusMaxAmount) return cell.cellType === 3;
     }
     onEat(cell) {
-        if (this.gameServer.config.virusPush) this.setBoost(this.gameServer.config.virusEjectSpeed - 460, Math.atan2(cell.boostDirection.x, cell.boostDirection.y));
+        if (this.gameServer.config.virusPush || this.gameServer.gameMode.ID === 2) this.setBoost(this.gameServer.config.virusEjectSpeed - 460, Math.atan2(cell.boostDirection.x, cell.boostDirection.y));
         else {
             this.setSize(Math.sqrt(this.radius + cell.radius));
             if (this._size >= this.gameServer.config.virusMaxSize) {
