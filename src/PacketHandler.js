@@ -23,7 +23,7 @@ class PacketHandler {
         this.handler = {
             254: this.onProtocol.bind(this)
         };
-        this.randomSkins = fs.readFileSync("../src/ai/Skins.txt", "utf8").split(/[\r\n]+/).filter(x => x !== "");
+        this.randomSkins = fs.readFileSync("../src/txt/skins.txt", "utf8").split(/[\r\n]+/).filter(x => x !== "");
     }
     handleMessage(message) {
         if (this.handler.hasOwnProperty(message[0])) {
