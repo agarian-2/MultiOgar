@@ -21,13 +21,13 @@ class BotLoader {
     loadNames() {
         this.randomNames = [];
         let fs = require("fs");
-        if (fs.existsSync("../src/ai/BotNames.txt")) this.randomNames = fs.readFileSync("../src/ai/BotNames.txt", "utf8").split(/[\r\n]+/).filter(x => x !== "");
+        if (fs.existsSync("../src/txt/botnames.txt")) this.randomNames = fs.readFileSync("../src/txt/botnames.txt", "utf8").split(/[\r\n]+/).filter(x => x !== "");
         this.nameIndex = 0;
     }
     loadSkins() {
         this.randomSkins = [];
         let fs = require("fs");
-        if (fs.existsSync("../src/ai/Skins.txt")) this.randomSkins = fs.readFileSync("../src/ai/Skins.txt", "utf8").split(/[\r\n]+/).filter(x => x !== "");
+        if (fs.existsSync("../src/txt/skins.txt")) this.randomSkins = fs.readFileSync("../src/txt/skins.txt", "utf8").split(/[\r\n]+/).filter(x => x !== "");
     }
     addBot() {
         let socket = new FakeSocket(this.gameServer);
