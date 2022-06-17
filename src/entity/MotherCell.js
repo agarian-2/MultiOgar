@@ -14,7 +14,6 @@ class MotherCell extends Virus {
             b: 99
         };
         this.minSize = 149;
-        this.spawnAmount = 2;
         if (!this._size) this.setSize(this.minSize);
     }
     canEat(cell) {
@@ -29,7 +28,7 @@ class MotherCell extends Virus {
         let size1 = this._size,
             foodSize = config.foodMinSize;
         if (config.foodMaxSize > foodSize) foodSize = Math.random() * (config.foodMaxSize - foodSize) + foodSize;
-        for (let i = 0; i < this.spawnAmount; i++) {
+        for (let i = 0; i < config.motherFoodSpawnRate; i++) {
             size1 = Math.sqrt(this.radius - 100);
             size1 = Math.max(size1, this.minSize);
             this.setSize(size1);
