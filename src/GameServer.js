@@ -113,6 +113,7 @@ class GameServer {
             virusEatMult: 1.1576,
             virusMaxCells: 16,
             virusPush: 0,
+            motherFoodSpawnRate: 2,
             // Ejected Cell Configs
             ejectMinSize: 36.056,
             ejectMaxSize: 36.056,
