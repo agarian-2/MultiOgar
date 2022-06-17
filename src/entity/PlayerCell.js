@@ -18,7 +18,7 @@ class PlayerCell extends Cell {
         return speed * Math.min(dist , 32) / 32;
     }
     onAdd(gameServer) {
-        if (gameServer.config.unshift === 1) gameServer.nodesPlayer.unshift(this);
+        if (gameServer.config.gravitationalPushsplits) gameServer.nodesPlayer.unshift(this);
         else gameServer.nodesPlayer.push(this);
         gameServer.gameMode.onCellAdd(this);
     }
