@@ -15,13 +15,13 @@ class CommandList {
     }
     saveIpBanList(gameServer) {
         try {
-            let banlist = fs.createWriteStream("../src/ipbanlist.txt");
+            let banlist = fs.createWriteStream("../src/txt/ipbanlist.txt");
             for (let v of gameServer.ipBanList.sort()) banlist.write(v + "\n");
             banlist.end();
             Log.info(gameServer.ipBanList.length + " IP ban records saved.");
         } catch (e) {
             Log.error(e.stack);
-            Log.error("Failed to save " + "../src/ipbanlist.txt" + ": " + e.message + "!");
+            Log.error("Failed to save " + "../src/txt/ipbanlist.txt" + ": " + e.message + "!");
         }
     }
     fillChar(data, char, fieldLength, rTL) {
