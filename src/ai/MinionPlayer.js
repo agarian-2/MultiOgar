@@ -15,13 +15,15 @@ class MinionPlayer extends PlayerTracker {
         }
         if (this.socket.isCloseReq) {
             for (;this.cells.length;) this.gameServer.removeNode(this.cells[0]);
+            let index = this.owner.minions.indexOf(this);
+            if (index !== -1) this.owner.minions.splice(index, 1);
             return this.isRemoved = true;
         }
         if (!this.cells.length) {
             this.gameServer.gameMode.onPlayerSpawn(this.gameServer, this);
-            if (!this.cells.length) this.socket.close();
+            if (!this.cells.length) return this.socket.close();
         }
-        if (this.owner.socket.isConnected === false || !this.owner.minion.control) this.socket.close();
+        if (this.owner.socket.isConnected === false || !this.owner.minion.control) return this.socket.close();
         this.frozen = this.owner.minion.frozen ? true : false;
         if (this.owner.minion.split) this.socket.packetHandler.pressSpace = true;
         if (this.owner.minion.eject) this.socket.packetHandler.pressW = true;
