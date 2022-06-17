@@ -1,0 +1,14 @@
+# Prevent possible banned IP address leak
+src/txt/ipbanlist.txt
+
+# Botname file
+src/txt/botnames.txt
+
+# Config file
+src/config.ini
+
+# Node modules
+node_modules
+
+# Package-lock
+package-lock.json
