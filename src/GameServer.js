@@ -735,14 +735,13 @@ class GameServer {
         let div = this.config.mobilePhysics ? 20 : 3,
             size = check._size - cell._size / div;
         if (m.squared >= size * size) return;
-        if (this.config.gravitationalPushsplits && check.canEat(cell) && cell.getAge() < 1 && check.cellType === 0) return;
+        if (this.config.gravitationalPushsplits && cell.getAge() < 1 && check.canEat(cell) && check.cellType === 0) return;
+        if (cell.getAge() < 1 && cell.cellType === 3) return;
         if (cell.owner && cell.owner === check.owner) {
             if (cell.getAge(this.tickCount) < this.config.splitRestoreTicks || check.getAge(this.tickCount) < this.config.splitRestoreTicks) return;
             if (cell.owner.cells.length <= 2) cell.owner.mergeOverride = false;
         } else {
-            let mult = this.config.playerEatMult;
-            if (cell.cellType === 2) mult = this.config.virusEatMult;
-            else if (cell.cellType === 1 || cell.cellType === 3) mult = 1;
+            let mult = cell.cellType === 2 ? this.config.virusEatMult : cell.cellType === 1 || cell.cellType === 3 ? 1 : this.config.playerEatMult;
             if (!check.canEat(cell) || check._size < mult * cell._size) return;
         }
         cell.isRemoved = true;
