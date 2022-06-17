@@ -547,13 +547,29 @@ class GameServer {
                     else self.resolveCollision(m);
                 });
             }
-            if (this.config.foodGrowInterval)
+            /*if (this.config.foodGrowInterval)
                 for (let i = 0; i < this.nodesFood.length; i++) {
-                    let cell = this.nodesFood[i];
-                    if (cell.getAge() === this.config.foodGrowInterval) cell.setSize(this.massToSize(2));
-                    else if (cell.getAge() === this.config.foodGrowInterval * 2) cell.setSize(this.massToSize(3));
-                    else if (cell.getAge() === this.config.foodGrowInterval * 3) cell.setSize(this.massToSize(4));
-                }
+                    let food = this.nodesFood[i];
+                    switch (food.growStage) {
+                        case 0:
+                            if (food.growStage === 0 && food.getAge() > this.config.foodGrowInterval && food.getAge() < this.config.foodGrowInterval * 2) {
+                                food.setSize(this.massToSize(2));
+                                food.growStage = 1;
+                            }
+                            break;
+                        case 1:
+                            if (food.growStage === 1 && food.getAge() > this.config.foodGrowInterval * 2 && food.getAge() < this.config.foodGrowInterval * 3) {
+                                food.setSize(this.massToSize(3));
+                                food.growStage = 2;
+                            }
+                            break;
+                        case 2:
+                            if (food.growStage === 3 && food.getAge() > this.config.foodGrowInterval * 3 && food.getAge() < this.config.foodGrowInterval * 4) {
+                                food.setSize(this.massToSize(4));
+                                food.growStage = 3;
+                            }
+                    }
+                }*/
             if ((this.tickCount % this.config.spawnInterval) === 0) this.spawnCells(this.randomPosition());
             this.gameMode.onTick(this);
             if (((this.tickCount + 3) % 25) === 0) this.updateDecay();
