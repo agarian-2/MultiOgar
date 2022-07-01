@@ -625,8 +625,8 @@ class GameServer {
     }
     movePlayer(cell, client) {
         if (client.socket.isConnected === false || client.frozen) return;
-        let dx = client.mouse.x - cell.position.x,
-            dy = client.mouse.y - cell.position.y,
+        let dx = Math.round(client.mouse.x - cell.position.x),
+            dy = Math.round(client.mouse.y - cell.position.y),
             squared = dx * dx + dy * dy;
         if (squared < 1 || isNaN(dx) || isNaN(dy)) return;
         let sqrt = Math.sqrt(squared),
@@ -735,8 +735,8 @@ class GameServer {
         let div = this.config.mobilePhysics ? 20 : 3,
             size = check._size - cell._size / div;
         if (m.squared >= size * size) return;
-        if (this.config.gravitationalPushsplits && cell.getAge() < 1 && check.canEat(cell) && check.cellType === 0) return;
-        if (cell.getAge() < 1 && cell.cellType === 3) return;
+        if (this.config.gravitationalPushsplits && check.cellType === 0 && check.canEat(cell) && cell.getAge() < 1) return;
+        if (cell.cellType === 3 && cell.getAge() < 1) return;
         if (cell.owner && cell.owner === check.owner) {
             if (cell.getAge(this.tickCount) < this.config.splitRestoreTicks || check.getAge(this.tickCount) < this.config.splitRestoreTicks) return;
             if (cell.owner.cells.length <= 2) cell.owner.mergeOverride = false;
@@ -827,8 +827,8 @@ class GameServer {
             }
         for (let i = 0; i < knownCells.length; i++) {
             let cell = knownCells[i],
-                x = client.mouse.x - cell.position.x,
-                y = client.mouse.y - cell.position.y;
+                x = Math.round(client.mouse.x - cell.position.x),
+                y = Math.round(client.mouse.y - cell.position.y);
             if (x * x + y * y < 1) x = y = 0;
             let angle = Math.atan2(x, y);
             this.splitPlayerCell(client, cell, angle, null, max);
