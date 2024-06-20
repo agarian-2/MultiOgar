@@ -106,7 +106,7 @@ class PacketHandler {
         this.pressQ = true;
         if (!this.socket.playerTracker.cells.length || !this.socket.playerTracker.minions.length) return;
         this.socket.playerTracker.minion.follow = !this.socket.playerTracker.minion.follow;
-        this.gameServer.sendChatMessage(null, this.socket.playerTracker, "Minions follow centerpoint: " + this.socket.playerTracker.minion.frozen + ".");
+        this.gameServer.sendChatMessage(null, this.socket.playerTracker, "Minions follow centerpoint: " + this.socket.playerTracker.minion.follow + ".");
     }
     onKeyW(message) {
         if (message.length === 1) this.pressW = true;
