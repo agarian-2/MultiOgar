@@ -531,7 +531,7 @@ class GameServer {
                 this.quadTree.find(cell.quadItem.bound, item => {
                     if (item.cell === cell) return;
                     let m = self.checkCellCollision(cell, item.cell);
-                    if (self.checkRigidCollision(m)) self.resolveRigidCollision(m, self.border);
+                    if (self.checkRigidCollision(m)) self.resolveRigidCollision(m);
                     else self.resolveCollision(m);
                 });
             }
@@ -544,7 +544,7 @@ class GameServer {
                 this.quadTree.find(cell.quadItem.bound, item => {
                     if (item.cell == cell) return;
                     let m = self.checkCellCollision(cell, item.cell);
-                    if (cell.cellType === 3 && item.cell.cellType === 3 && !self.config.mobilePhysics && self.config.ejectCollisionType !== 2) self.resolveRigidCollision(m, self.border);
+                    if (cell.cellType === 3 && item.cell.cellType === 3 && !self.config.mobilePhysics && self.config.ejectCollisionType !== 2) self.resolveRigidCollision(m);
                     else self.resolveCollision(m);
                 });
             }
@@ -717,11 +717,13 @@ class GameServer {
         } else {
             let rt = m.cell._mass + m.check._mass,
                 r1 = m.cell._mass / rt,
-                r2 = m.check._mass / rt;
-            m.cell.position.x -= m.push * ~~m.dx * r2;
-            m.cell.position.y -= m.push * ~~m.dy * r2;
-            m.check.position.x += m.push * ~~m.dx * r1;
-            m.check.position.y += m.push * ~~m.dy * r1;
+                r2 = m.check._mass / rt,
+                fx = ~~m.dx,
+                fy = ~~m.dy;
+            m.cell.position.x -= m.push * fx * r2;
+            m.cell.position.y -= m.push * fy * r2;
+            m.check.position.x += m.push * fx * r1;
+            m.check.position.y += m.push * fy * r1;
         }
     }
     resolveCollision(m) {
