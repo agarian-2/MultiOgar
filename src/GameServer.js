@@ -625,8 +625,8 @@ class GameServer {
     }
     movePlayer(cell, client) {
         if (client.socket.isConnected === false || client.frozen) return;
-        let dx = Math.round(client.mouse.x - cell.position.x),
-            dy = Math.round(client.mouse.y - cell.position.y),
+        let dx = ~~(client.mouse.x - cell.position.x),
+            dy = ~~(client.mouse.y - cell.position.y),
             squared = dx * dx + dy * dy;
         if (squared < 1 || isNaN(dx) || isNaN(dy)) return;
         let sqrt = Math.sqrt(squared),
@@ -718,10 +718,10 @@ class GameServer {
             let rt = m.cell._mass + m.check._mass,
                 r1 = m.cell._mass / rt,
                 r2 = m.check._mass / rt;
-            m.cell.position.x -= m.push * m.dx * r2;
-            m.cell.position.y -= m.push * m.dy * r2;
-            m.check.position.x += m.push * m.dx * r1;
-            m.check.position.y += m.push * m.dy * r1;
+            m.cell.position.x -= m.push * ~~m.dx * r2;
+            m.cell.position.y -= m.push * ~~m.dy * r2;
+            m.check.position.x += m.push * ~~m.dx * r1;
+            m.check.position.y += m.push * ~~m.dy * r1;
         }
     }
     resolveCollision(m) {
@@ -827,8 +827,8 @@ class GameServer {
             }
         for (let i = 0; i < knownCells.length; i++) {
             let cell = knownCells[i],
-                x = Math.round(client.mouse.x - cell.position.x),
-                y = Math.round(client.mouse.y - cell.position.y);
+                x = ~~(client.mouse.x - cell.position.x),
+                y = ~~(client.mouse.y - cell.position.y);
             if (x * x + y * y < 1) x = y = 0;
             let angle = Math.atan2(x, y);
             this.splitPlayerCell(client, cell, angle, null, max);
