@@ -632,8 +632,8 @@ class GameServer {
         let sqrt = Math.sqrt(squared),
             speed = cell.getSpeed(sqrt);
         if (speed <= 0) return;
-        cell.position.x += dx / sqrt * speed;
-        cell.position.y += dy / sqrt * speed;
+        cell.position.x += (dx / sqrt) * speed;
+        cell.position.y += (dy / sqrt) * speed;
     }
     moveCell(cell) {
         if (cell.isMoving && !cell.boostDistance || cell.isRemoved) {
