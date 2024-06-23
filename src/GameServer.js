@@ -777,7 +777,7 @@ class GameServer {
             }
     }
     spawnPlayer(client, pos) {
-        if (client.isMinion) client.socket.close(1000, "Marked as a minion!");
+        if (client.isMinion) return client.socket.close(1000, "Marked as a minion!");
         if (this.disableSpawn) return;
         let startSize = this.config.playerStartSize;
         if (client.spawnMass) startSize = client.spawnMass;
