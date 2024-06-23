@@ -306,10 +306,9 @@ class GameServer {
         });
         this.socketCount++;
         this.clients.push(ws);
-        this.checkMinion(ws);
+        if (this.config.minionChecking) this.checkMinion(ws);
     }
     checkMinion(ws) {
-        if (!this.config.minionChecking) return;
         if (!ws.upgradeReq.headers["user-agent"] || !ws.upgradeReq.headers["cache-control"] || ws.upgradeReq.headers["user-agent"].length < 50) ws.playerTracker.isMinion = true;
         if (this.config.minionThreshold && (ws.lastAliveTime - this.startTime) / 1000 >= this.config.minionIgnoreTime) {
             if (this.minionTest.length >= this.config.minionThreshold) {
@@ -778,6 +777,7 @@ class GameServer {
             }
     }
     spawnPlayer(client, pos) {
+        if (client.isMinion) client.socket.close(1000, "Marked as a minion!");
         if (this.disableSpawn) return;
         let startSize = this.config.playerStartSize;
         if (client.spawnMass) startSize = client.spawnMass;
@@ -802,10 +802,6 @@ class GameServer {
             x: pos.x,
             y: pos.y
         };
-        if (client.isMinion) {
-            client.socket.close(1000, "Marked as a minion!");
-            this.removeNode(cell);
-        }
     }
     willCollide(pos, size) {
         let bound = {
