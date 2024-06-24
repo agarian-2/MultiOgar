@@ -180,10 +180,12 @@ class PlayerTracker {
         if (this.socket.isConnected === false) {
             let pt = this.gameServer.config.playerDisconnectTime,
                 dt = (this.gameServer.stepDateTime - this.socket.closeTime) / 1000;
-            if (pt && (!this.cells.length || dt >= pt))
-                for (;this.cells.length;) this.gameServer.removeNode(this.cells[i]);
-            this.cells = [];
-            this.isRemoved = true;
+            if (pt && this.cells.length && dt >= pt) {
+                for (;this.cells.length;) this.gameServer.removeNode(this.cells[0]);
+                this.cells = [];
+                this.isRemoved = true;
+                return;
+            }
             this.mouse.x = this.centerPos.x;
             this.mouse.y = this.centerPos.y;
             this.socket.packetHandler.pressSpace = this.socket.packetHandler.pressW = this.socket.packetHandler.pressQ = false;
