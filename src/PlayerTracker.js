@@ -180,9 +180,11 @@ class PlayerTracker {
         if (this.socket.isConnected === false) {
             let pt = this.gameServer.config.playerDisconnectTime,
                 dt = (this.gameServer.stepDateTime - this.socket.closeTime) / 1000;
-            if (pt && this.cells.length && dt >= pt) {
-                for (;this.cells.length;) this.gameServer.removeNode(this.cells[0]);
-                this.cells = [];
+            if (dt >= pt) {
+                if (this.cells.length) {
+                    for (;this.cells.length;) this.gameServer.removeNode(this.cells[0]);
+                    this.cells = [];
+                }
                 this.isRemoved = true;
                 return;
             }
