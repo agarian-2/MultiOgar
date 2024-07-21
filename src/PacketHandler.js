@@ -89,8 +89,10 @@ class PacketHandler {
         if (this.socket.playerTracker.cells.length) return;
         let reader = new BinaryReader(message);
         reader.skipBytes(1);
-        let protocol = null;
-        protocol = 6 > this.protocol ? reader.readStringZeroUnicode() : reader.readStringZeroUtf8(), this.nickName(protocol);
+        let text = null;
+        if (this.protocol > 6) text = reader.readStringZeroUnicode();
+        else text = reader.readStringZeroUtf8();
+        this.nickName(text);
     }
     onSpectate(message) {
         if (message.length === 1 && !this.socket.playerTracker.cells.length) this.socket.playerTracker.isSpectating = true;
