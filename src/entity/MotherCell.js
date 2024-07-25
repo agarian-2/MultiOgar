@@ -24,7 +24,7 @@ class MotherCell extends Virus {
     }
     onUpdate() {
         let config = this.gameServer.config;
-        if (this.gameServer.nodesFood.length >= config.foodMaxAmount) return;
+        if (this.gameServer.nodesFood.filter(food => food.fromMother).length >= config.foodMaxAmount) return;
         let size1 = this._size,
             foodSize = config.foodMinSize;
         if (config.foodMaxSize > foodSize) foodSize = Math.random() * (config.foodMaxSize - foodSize) + foodSize;
