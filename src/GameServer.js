@@ -637,7 +637,7 @@ class GameServer {
     moveCell(cell) {
         if (cell.isMoving && !cell.boostDistance || cell.isRemoved) {
             cell.boostDistance = 0;
-            cell.isMoving = true;
+            cell.isMoving = false;
             return;
         }
         let speed = cell.boostDistance / 10;
