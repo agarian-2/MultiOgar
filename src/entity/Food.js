@@ -6,6 +6,7 @@ class Food extends Cell {
         super(gameServer, owner, position, size);
         this.cellType = 1;
         this.tickOfBirth = 0;
+        this.fromMother = false;
     }
     getAge() {
         if (this.tickOfBirth === null) return 0;
