@@ -2,6 +2,7 @@
 const Log = require("./modules/Logger");
 const Commands = require("./modules/CommandList");
 const GameServer = require("./GameServer");
+const Entity = require("./entity");
 const readline = require("readline");
 const parseCommands = str => {
     Log.write(">" + str);
