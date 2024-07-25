@@ -759,8 +759,10 @@ class GameServer {
         };
     }
     spawnCells(player) {
-        let foodMaxCount = this.config.foodMinAmount - this.nodesFood.length,
-            foodSpawnCount = Math.min(foodMaxCount, this.config.foodSpawnAmount);
+        let foodMaxCount;
+        if (this.gameMode.ID === 2) foodMaxCount = this.config.foodMinAmount - this.nodesFood.filter(food => !food.fromMother).length;
+        else foodMaxCount = this.config.foodMinAmount - this.nodesFood.length;
+        let foodSpawnCount = Math.min(foodMaxCount, this.config.foodSpawnAmount);
         for (let i = 0; i < foodSpawnCount; i++) {
             let size = this.config.foodMinSize;
             if (this.config.foodMaxSize > size) size = Math.random() * (this.config.foodMaxSize - size) + size;
