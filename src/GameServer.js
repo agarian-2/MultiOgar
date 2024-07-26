@@ -635,11 +635,12 @@ class GameServer {
         cell.position.y += (dy / sqrt) * speed;
     }
     moveCell(cell) {
-        if (cell.isMoving && !cell.boostDistance || cell.isRemoved) {
-            cell.boostDistance = 0;
-            cell.isMoving = false;
-            return;
-        }
+        if (cell.isMoving)
+            if (!cell.boostDistance || cell.isRemoved || (this.gameMode.ID === 2 && cell.fromMother && cell.boostDistance.toFixed(1) == 0)) {
+                cell.boostDistance = 0;
+                cell.isMoving = false;
+                return;
+            }
         let speed = cell.boostDistance / 10;
         cell.boostDistance -= speed;
         cell.position.x += cell.boostDirection.x * speed;
