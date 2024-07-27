@@ -867,8 +867,9 @@ class GameServer {
             else angle += this.config.ejectRandomAngle ? .6 * Math.random() - .3 : 0;
             let size = this.config.ejectMinSize;
             if (this.config.ejectMaxSize > size) size = Math.random() * (this.config.ejectMaxSize - size) + size;
-            let eject = new Entity.EjectedMass(this, null, pos, size);
+            let eject;
             if (this.config.ejectVirus) eject = new Entity.Virus(this, null, pos, size);
+            else eject = new Entity.EjectedMass(this, null, pos, size);
             if (this.config.ejectRandomColor) eject.color = this.randomColor();
             else eject.color = cell.color;
             eject.setBoost(this.config.ejectSpeed, angle);
